@@ -79,7 +79,8 @@ export const symbols: Record<string, AACSymbol[]> = {
   core: [
     { emoji: '👤', en: 'I', hi: 'मैं', core: true, wordType: 'core' },
     { emoji: '👥', en: 'You', hi: 'तुम', core: true, wordType: 'core' },
-    { emoji: '🧑', en: 'He/She', hi: 'वह', core: true, wordType: 'core' },
+    { emoji: '👦', en: 'He', hi: 'वह (लड़का)', core: true, wordType: 'core' },
+    { emoji: '👧', en: 'She', hi: 'वह (लड़की)', core: true, wordType: 'core' },
     { emoji: '👨‍👩‍👧', en: 'We', hi: 'हम', core: true, wordType: 'core' },
     { emoji: '👥', en: 'They', hi: 'वे', core: true, wordType: 'core' },
     { emoji: '🙋', en: 'Me', hi: 'मुझे', core: true, wordType: 'core' },
