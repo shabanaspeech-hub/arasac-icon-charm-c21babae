@@ -160,9 +160,6 @@ export default function AACApp() {
           <button onClick={() => setVoiceModalOpen(true)} className="flex items-center gap-1.5 px-4 py-2 bg-info text-info-foreground rounded-lg font-bold text-sm hover:brightness-95 transition-all">
             <Mic size={16} /> Voice
           </button>
-          <button onClick={() => setColorCodingEnabled(!colorCodingEnabled)} className="flex items-center gap-1.5 px-4 py-2 bg-accent text-accent-foreground rounded-lg font-bold text-sm hover:brightness-95 transition-all">
-            <Palette size={16} /> {colorCodingEnabled ? 'Hide Colors' : 'Show Colors'}
-          </button>
         </div>
 
         {/* Search */}
@@ -180,14 +177,12 @@ export default function AACApp() {
         </div>
 
         {/* Color Legend */}
-        {colorCodingEnabled && (
-          <div className="p-2 px-4 bg-secondary border-b-2 border-border text-xs flex flex-wrap gap-3">
-            <strong>Color Code:</strong>
-            {Object.entries(wordColors).map(([type, icon]) => (
-              <span key={type}>{icon} {type.charAt(0).toUpperCase() + type.slice(1)}</span>
-            ))}
-          </div>
-        )}
+        <div className="p-2 px-4 bg-secondary border-b-2 border-border text-xs flex flex-wrap gap-3">
+          <strong>Color Code:</strong>
+          {Object.entries(wordColors).map(([type, icon]) => (
+            <span key={type}>{icon} {type.charAt(0).toUpperCase() + type.slice(1)}</span>
+          ))}
+        </div>
 
         {/* Categories */}
         <div className="flex overflow-x-auto gap-2 p-3 bg-secondary border-b-2 border-border">
@@ -222,7 +217,6 @@ export default function AACApp() {
                   key={`${symbol.en}-${i}`}
                   symbol={symbol}
                   language={language}
-                  colorCodingEnabled={colorCodingEnabled}
                   onClick={() => addToSentence(symbol)}
                 />
               ))
