@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import { Volume2, Delete, Trash2, Mic, Palette, Search } from 'lucide-react';
+import spectraLogo from '@/assets/spectra-logo.png';
 import { symbols, categories, quickPhrases, type AACSymbol, type CategoryKey } from '@/data/aacData';
 import { useSpeech } from '@/hooks/useSpeech';
 import SymbolCard from './SymbolCard';
