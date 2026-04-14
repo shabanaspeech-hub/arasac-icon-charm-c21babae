@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { Volume2, Delete, Trash2, Mic, Palette, Search } from 'lucide-react';
+import { Volume2, Delete, Trash2, Mic, Search } from 'lucide-react';
 import spectraLogo from '@/assets/spectra-logo.png';
 import { symbols, categories, quickPhrases, type AACSymbol, type CategoryKey } from '@/data/aacData';
 import { useSpeech } from '@/hooks/useSpeech';
@@ -20,7 +20,7 @@ export default function AACApp() {
   const [currentCategory, setCurrentCategory] = useState<string>('core');
   const [sentence, setSentence] = useState<AACSymbol[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
-  const [colorCodingEnabled, setColorCodingEnabled] = useState(false);
+  
   const [voiceModalOpen, setVoiceModalOpen] = useState(false);
   const { voiceSettings, setVoiceSettings, speak } = useSpeech();
   const { trackWord } = useUsageTracker();
