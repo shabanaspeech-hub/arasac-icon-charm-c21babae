@@ -82,10 +82,15 @@ export default function AACApp() {
     <div className="min-h-screen bg-background p-2 sm:p-4">
       <div className="max-w-6xl mx-auto bg-card rounded-2xl shadow-2xl overflow-hidden">
         {/* Header */}
-        <header className="aac-gradient text-primary-foreground p-4 text-center">
-          <h1 className="text-xl sm:text-2xl font-extrabold">AAC Communication App</h1>
-          <p className="text-xs opacity-90 mt-1">Developed by Shabana Tariq - Speech Language Therapist</p>
-          <div className="bg-primary-foreground/20 p-2 mt-2 rounded-lg text-xs font-semibold">
+        <header className="aac-gradient text-primary-foreground p-4">
+          <div className="flex items-center justify-center gap-3">
+            <img src={spectraLogo} alt="Spectra Speech" className="w-12 h-12 rounded-full bg-white/90 p-1 shadow-lg" />
+            <div className="text-center">
+              <h1 className="text-xl sm:text-2xl font-extrabold">AAC Communication App</h1>
+              <p className="text-xs opacity-90 mt-1">Developed by Shabana Tariq - Speech Language Therapist</p>
+            </div>
+          </div>
+          <div className="bg-primary-foreground/20 p-2 mt-3 rounded-lg text-xs font-semibold text-center">
             📚 Total Words: {totalWords} | ⭐ Core Words: {coreWords} | 📁 Categories: {Object.keys(categories).length - 1}
           </div>
         </header>
