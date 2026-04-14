@@ -6,6 +6,7 @@ import { useSpeech } from '@/hooks/useSpeech';
 import SymbolCard from './SymbolCard';
 import SentenceBar from './SentenceBar';
 import Keyboard from './Keyboard';
+import SuggestionBar from './SuggestionBar';
 import VoiceSettingsDialog from './VoiceSettingsDialog';
 
 const wordColors: Record<string, string> = {
@@ -132,6 +133,13 @@ export default function AACApp() {
 
         {/* Sentence Bar */}
         <SentenceBar sentence={sentence} language={language} onRemoveWord={removeWord} />
+
+        {/* Smart Suggestions */}
+        <SuggestionBar
+          lastWord={sentence.length > 0 ? sentence[sentence.length - 1] : null}
+          language={language}
+          onSelect={addToSentence}
+        />
 
         {/* Controls */}
         <div className="flex justify-center gap-2 p-3 bg-secondary flex-wrap">
