@@ -3,6 +3,7 @@ import { Volume2, Delete, Trash2, Mic, Palette, Search } from 'lucide-react';
 import spectraLogo from '@/assets/spectra-logo.png';
 import { symbols, categories, quickPhrases, type AACSymbol, type CategoryKey } from '@/data/aacData';
 import { useSpeech } from '@/hooks/useSpeech';
+import { useUsageTracker } from '@/hooks/useUsageTracker';
 import SymbolCard from './SymbolCard';
 import SentenceBar from './SentenceBar';
 import Keyboard from './Keyboard';
@@ -22,12 +23,14 @@ export default function AACApp() {
   const [colorCodingEnabled, setColorCodingEnabled] = useState(false);
   const [voiceModalOpen, setVoiceModalOpen] = useState(false);
   const { voiceSettings, setVoiceSettings, speak } = useSpeech();
+  const { trackWord } = useUsageTracker();
 
   const addToSentence = useCallback((symbol: AACSymbol) => {
     const text = language === 'english' ? symbol.en : symbol.hi;
     speak(text, language);
+    trackWord(text);
     setSentence(prev => [...prev, symbol]);
-  }, [language, speak]);
+  }, [language, speak, trackWord]);
 
   const removeWord = useCallback((index: number) => {
     setSentence(prev => prev.filter((_, i) => i !== index));
@@ -41,11 +44,13 @@ export default function AACApp() {
 
   const addPhrase = useCallback((phrase: string) => {
     speak(phrase, language);
+    trackWord(phrase);
     setSentence(prev => [...prev, { emoji: '💬', en: phrase, hi: phrase, isPhrase: true }]);
-  }, [language, speak]);
+  }, [language, speak, trackWord]);
 
   const addTypedWord = useCallback((word: string) => {
     speak(word, language);
+    trackWord(word);
     setSentence(prev => [...prev, { emoji: '💬', en: word, hi: word, isTyped: true }]);
   }, [language, speak]);
 
