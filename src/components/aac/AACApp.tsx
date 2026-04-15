@@ -9,6 +9,7 @@ import SentenceBar from './SentenceBar';
 import Keyboard from './Keyboard';
 import SuggestionBar from './SuggestionBar';
 import VoiceSettingsDialog from './VoiceSettingsDialog';
+import InstallBanner from './InstallBanner';
 
 const wordColors: Record<string, string> = {
   core: '🟨', noun: '🟦', verb: '🟩', descriptor: '🟪',
@@ -237,6 +238,9 @@ export default function AACApp() {
         onSettingsChange={setVoiceSettings}
         onTest={() => speak(language === 'english' ? 'Hello, this is a test' : 'नमस्ते, यह एक परीक्षण है', language)}
       />
+
+      {/* Install Banner */}
+      <InstallBanner />
     </div>
   );
 }
