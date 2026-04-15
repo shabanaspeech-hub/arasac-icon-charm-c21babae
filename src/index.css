@@ -122,4 +122,8 @@
     border-color: hsl(var(--aac-misc));
     background: hsl(var(--aac-misc) / 0.15);
   }
+
+  .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 8px);
+  }
 }
