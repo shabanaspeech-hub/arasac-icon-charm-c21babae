@@ -45,7 +45,7 @@ export default function SymbolCard({ symbol, language, onClick }: SymbolCardProp
       <div className="w-16 h-16 flex items-center justify-center mb-1">
         {pictogramId && !imgError ? (
           <img
-            src={getArasaacImageUrl(pictogramId)}
+            src={getArasaacImageUrl(pictogramId, { skin: symbol.wordType === 'feeling' || symbol.wordType === 'social' })}
             alt={symbol.en}
             className="w-full h-full object-contain"
             onError={() => setImgError(true)}
