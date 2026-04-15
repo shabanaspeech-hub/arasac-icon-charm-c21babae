@@ -19,7 +19,10 @@ const fetchPictogramId = async (keyword: string): Promise<number | null> => {
   }
 };
 
-export function getArasaacImageUrl(id: number): string {
+export function getArasaacImageUrl(id: number, options?: { skin?: boolean }): string {
+  if (options?.skin) {
+    return `https://static.arasaac.org/pictograms/${id}/${id}_300.png?skin=yellow`;
+  }
   return `https://static.arasaac.org/pictograms/${id}/${id}_300.png`;
 }
 
