@@ -64,7 +64,7 @@ export default function InstallBanner() {
       <div className="max-w-xl mx-auto flex items-center gap-3">
         <Download size={24} className="shrink-0" />
         <div className="flex-1 min-w-0">
-          <p className="font-bold text-sm">Install Spectra AAC</p>
+          <p className="font-bold text-sm">Install Spectra Speech</p>
           {isIOS ? (
             <p className="text-xs opacity-90 flex items-center gap-1">
               Tap <Share size={14} className="inline" /> then "Add to Home Screen"
