@@ -7,7 +7,7 @@ interface CategoryManagerDialogProps {
   open: boolean;
   onClose: () => void;
   categories: CustomCategory[];
-  onAdd: (nameEn: string, nameHi: string, emoji: string) => Promise<void>;
+  onAdd: (nameEn: string, nameHi: string, emoji: string) => Promise<any>;
   onRename: (id: string, nameEn: string, nameHi: string) => Promise<void>;
   onDelete: (id: string) => Promise<void>;
 }
