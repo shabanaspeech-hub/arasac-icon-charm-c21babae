@@ -1,7 +1,7 @@
 {
-  "name": "Spectra AAC",
-  "short_name": "AAC",
-  "description": "Child-friendly AAC communication app by Shabana Tariq",
+  "name": "Spectra Speech – AAC Communication App",
+  "short_name": "Spectra Speech",
+  "description": "Child-friendly AAC communication app by Shabana Tariq - Speech Language Therapist",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",

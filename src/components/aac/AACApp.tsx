@@ -1,15 +1,20 @@
 import { useState, useCallback } from 'react';
-import { Volume2, Delete, Trash2, Mic, Search } from 'lucide-react';
+import { Volume2, Delete, Trash2, Mic, Search, Settings, Plus, FolderOpen, Lock, Unlock } from 'lucide-react';
 import spectraLogo from '@/assets/spectra-logo.png';
 import { symbols, categories, quickPhrases, type AACSymbol, type CategoryKey } from '@/data/aacData';
 import { useSpeech } from '@/hooks/useSpeech';
 import { useUsageTracker } from '@/hooks/useUsageTracker';
+import { useCustomData } from '@/hooks/useCustomData';
 import SymbolCard from './SymbolCard';
 import SentenceBar from './SentenceBar';
 import Keyboard from './Keyboard';
 import SuggestionBar from './SuggestionBar';
+import CoreWordsBar from './CoreWordsBar';
 import VoiceSettingsDialog from './VoiceSettingsDialog';
 import InstallBanner from './InstallBanner';
+import AddItemDialog from './AddItemDialog';
+import CategoryManagerDialog from './CategoryManagerDialog';
+import CustomItemCard from './CustomItemCard';
 
 const wordColors: Record<string, string> = {
   core: '🟨', noun: '🟦', verb: '🟩', descriptor: '🟪',
@@ -21,10 +26,25 @@ export default function AACApp() {
   const [currentCategory, setCurrentCategory] = useState<string>('core');
   const [sentence, setSentence] = useState<AACSymbol[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
-  
+  const [editMode, setEditMode] = useState(false);
   const [voiceModalOpen, setVoiceModalOpen] = useState(false);
+  const [addItemOpen, setAddItemOpen] = useState(false);
+  const [categoryManagerOpen, setCategoryManagerOpen] = useState(false);
+  const [editingItem, setEditingItem] = useState<any>(null);
+  const [activeCustomCategory, setActiveCustomCategory] = useState<string | null>(null);
+
   const { voiceSettings, setVoiceSettings, speak } = useSpeech();
   const { trackWord } = useUsageTracker();
+  const {
+    categories: customCategories,
+    createCategory,
+    renameCategory,
+    removeCategory,
+    createItem,
+    editItem,
+    removeItem,
+    getItemsForCategory,
+  } = useCustomData();
 
   const addToSentence = useCallback((symbol: AACSymbol) => {
     const text = language === 'english' ? symbol.en : symbol.hi;
@@ -55,6 +75,29 @@ export default function AACApp() {
     setSentence(prev => [...prev, { emoji: '💬', en: word, hi: word, isTyped: true }]);
   }, [language, speak]);
 
+  const handleCustomItemTap = useCallback((item: any) => {
+    // Play custom audio if available, otherwise TTS
+    if (item.audioData) {
+      const audio = new Audio(item.audioData);
+      audio.play();
+    } else {
+      const text = language === 'english' ? item.label : item.labelHi;
+      speak(text, language);
+    }
+    trackWord(item.label);
+    setSentence(prev => [...prev, { emoji: '📷', en: item.label, hi: item.labelHi, img: item.imageData, wordType: item.wordType }]);
+  }, [language, speak, trackWord]);
+
+  const handleSaveItem = useCallback(async (data: any) => {
+    if (!activeCustomCategory) return;
+    if (editingItem) {
+      await editItem(editingItem.id, data);
+    } else {
+      await createItem({ ...data, categoryId: activeCustomCategory });
+    }
+    setEditingItem(null);
+  }, [activeCustomCategory, editingItem, editItem, createItem]);
+
   // Get filtered symbols
   const getDisplaySymbols = () => {
     if (searchQuery.trim()) {
@@ -75,6 +118,8 @@ export default function AACApp() {
 
   const displaySymbols = getDisplaySymbols();
   const phrases = language === 'english' ? quickPhrases.en : quickPhrases.hi;
+  const isCustomView = activeCustomCategory !== null;
+  const customItems = activeCustomCategory ? getItemsForCategory(activeCustomCategory) : [];
 
   // Stats
   let totalWords = 0;
@@ -91,12 +136,22 @@ export default function AACApp() {
       <div className="max-w-6xl mx-auto bg-card rounded-2xl shadow-2xl overflow-hidden">
         {/* Header */}
         <header className="aac-gradient text-primary-foreground p-4">
-          <div className="flex items-center justify-center gap-3">
-            <img src={spectraLogo} alt="Spectra Speech" className="w-12 h-12 rounded-full bg-white/90 p-1 shadow-lg" />
-            <div className="text-center">
-              <h1 className="text-xl sm:text-2xl font-extrabold">AAC Communication App</h1>
-              <p className="text-xs opacity-90 mt-1">Developed by Shabana Tariq - Speech Language Therapist</p>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3 flex-1 justify-center">
+              <img src={spectraLogo} alt="Spectra Speech" className="w-12 h-12 rounded-full bg-white/90 p-1 shadow-lg" />
+              <div className="text-center">
+                <h1 className="text-xl sm:text-2xl font-extrabold">Spectra Speech – AAC Communication App</h1>
+                <p className="text-xs opacity-90 mt-1">Developed by Shabana Tariq - Speech Language Therapist</p>
+              </div>
             </div>
+            {/* Edit Mode Toggle */}
+            <button
+              onClick={() => setEditMode(!editMode)}
+              className={`flex items-center gap-1.5 px-3 py-2 rounded-lg font-bold text-xs transition-all shrink-0 ml-2 ${editMode ? 'bg-warning text-warning-foreground' : 'bg-primary-foreground/20 text-primary-foreground'}`}
+            >
+              {editMode ? <Unlock size={14} /> : <Lock size={14} />}
+              {editMode ? 'Edit ON' : 'Locked'}
+            </button>
           </div>
           <div className="bg-primary-foreground/20 p-2 mt-3 rounded-lg text-xs font-semibold text-center">
             📚 Total Words: {totalWords} | ⭐ Core Words: {coreWords} | 📁 Categories: {Object.keys(categories).length - 1}
@@ -118,6 +173,9 @@ export default function AACApp() {
             हिंदी (Hindi)
           </button>
         </div>
+
+        {/* Core Words - Always Visible */}
+        <CoreWordsBar language={language} onSelect={addToSentence} />
 
         {/* Quick Phrases */}
         <div className="bg-warning/15 p-3 border-b-[3px] border-warning overflow-x-auto">
@@ -185,20 +243,20 @@ export default function AACApp() {
           ))}
         </div>
 
-        {/* Categories */}
+        {/* Built-in Categories */}
         <div className="flex overflow-x-auto gap-2 p-3 bg-secondary border-b-2 border-border">
           {Object.entries(categories).map(([key, val]) => {
             const label = language === 'english' ? val.en : val.hi;
-            const isActive = key === currentCategory;
+            const isActive = key === currentCategory && !isCustomView;
             let btnClass = 'bg-card text-foreground shadow-sm';
             if (key === 'core') btnClass = isActive ? 'bg-success/80 text-success-foreground' : 'bg-success text-success-foreground';
             else if (key === 'keyboard') btnClass = isActive ? 'bg-info/80 text-info-foreground' : 'bg-info text-info-foreground';
             else if (isActive) btnClass = 'aac-gradient text-primary-foreground';
-            
+
             return (
               <button
                 key={key}
-                onClick={() => { setCurrentCategory(key); setSearchQuery(''); }}
+                onClick={() => { setCurrentCategory(key); setSearchQuery(''); setActiveCustomCategory(null); }}
                 className={`px-4 py-2 rounded-lg font-bold text-xs whitespace-nowrap transition-all ${btnClass}`}
               >
                 {label}
@@ -207,8 +265,65 @@ export default function AACApp() {
           })}
         </div>
 
+        {/* Custom Categories */}
+        {customCategories.length > 0 && (
+          <div className="flex overflow-x-auto gap-2 p-3 bg-accent/10 border-b-2 border-border items-center">
+            <span className="text-xs font-bold text-muted-foreground whitespace-nowrap">📷 My Items:</span>
+            {customCategories.map(cat => {
+              const isActive = activeCustomCategory === cat.id;
+              return (
+                <button
+                  key={cat.id}
+                  onClick={() => { setActiveCustomCategory(cat.id); setSearchQuery(''); }}
+                  className={`px-4 py-2 rounded-lg font-bold text-xs whitespace-nowrap transition-all ${isActive ? 'aac-gradient text-primary-foreground' : 'bg-card text-foreground shadow-sm border border-border'}`}
+                >
+                  {language === 'english' ? cat.nameEn : cat.nameHi}
+                </button>
+              );
+            })}
+            {editMode && (
+              <button
+                onClick={() => setCategoryManagerOpen(true)}
+                className="px-3 py-2 bg-primary/10 text-primary rounded-lg font-bold text-xs border border-primary/30 hover:bg-primary/20 whitespace-nowrap"
+              >
+                <Settings size={12} className="inline mr-1" /> Manage
+              </button>
+            )}
+          </div>
+        )}
+
         {/* Content */}
-        {currentCategory === 'keyboard' ? (
+        {isCustomView ? (
+          <div className="p-4">
+            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3 max-h-[500px] overflow-y-auto">
+              {customItems.map(item => (
+                <CustomItemCard
+                  key={item.id}
+                  item={item}
+                  language={language}
+                  editMode={editMode}
+                  onClick={() => handleCustomItemTap(item)}
+                  onEdit={() => { setEditingItem(item); setAddItemOpen(true); }}
+                  onDelete={() => removeItem(item.id)}
+                />
+              ))}
+              {editMode && (
+                <button
+                  onClick={() => { setEditingItem(null); setAddItemOpen(true); }}
+                  className="flex flex-col items-center justify-center p-3 rounded-xl border-[3px] border-dashed border-primary/40 cursor-pointer transition-all hover:border-primary hover:bg-primary/5 min-h-[120px]"
+                >
+                  <Plus size={32} className="text-primary/60 mb-1" />
+                  <span className="text-xs font-bold text-primary/60">Add Item</span>
+                </button>
+              )}
+              {customItems.length === 0 && !editMode && (
+                <p className="col-span-full text-center text-muted-foreground py-8">
+                  {language === 'english' ? 'No custom items yet. Turn on Edit mode to add items.' : 'अभी तक कोई कस्टम आइटम नहीं। आइटम जोड़ने के लिए एडिट मोड चालू करें।'}
+                </p>
+              )}
+            </div>
+          </div>
+        ) : currentCategory === 'keyboard' ? (
           <Keyboard language={language} onAddWord={addTypedWord} />
         ) : (
           <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3 p-4 max-h-[500px] overflow-y-auto">
@@ -230,7 +345,7 @@ export default function AACApp() {
         )}
       </div>
 
-      {/* Voice Settings */}
+      {/* Dialogs */}
       <VoiceSettingsDialog
         open={voiceModalOpen}
         onClose={() => setVoiceModalOpen(false)}
@@ -239,7 +354,22 @@ export default function AACApp() {
         onTest={() => speak(language === 'english' ? 'Hello, this is a test' : 'नमस्ते, यह एक परीक्षण है', language)}
       />
 
-      {/* Install Banner */}
+      <AddItemDialog
+        open={addItemOpen}
+        onClose={() => { setAddItemOpen(false); setEditingItem(null); }}
+        onSave={handleSaveItem}
+        editData={editingItem ? { label: editingItem.label, labelHi: editingItem.labelHi, imageData: editingItem.imageData, audioData: editingItem.audioData, wordType: editingItem.wordType } : null}
+      />
+
+      <CategoryManagerDialog
+        open={categoryManagerOpen}
+        onClose={() => setCategoryManagerOpen(false)}
+        categories={customCategories}
+        onAdd={createCategory}
+        onRename={renameCategory}
+        onDelete={removeCategory}
+      />
+
       <InstallBanner />
     </div>
   );
