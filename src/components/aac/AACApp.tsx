@@ -35,8 +35,11 @@ export default function AACApp() {
   const [categoryManagerOpen, setCategoryManagerOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<any>(null);
   const [activeCustomCategory, setActiveCustomCategory] = useState<string | null>(null);
+  const [showFavorites, setShowFavorites] = useState(false);
 
-  const { voiceSettings, setVoiceSettings, speak } = useSpeech();
+  const { gridSize, setGridSize, gridColClass } = useGridSize();
+  const { favorites, isFavorite, toggleFavorite, removeFavorite, moveFavorite } = useFavorites();
+
   const { trackWord } = useUsageTracker();
   const {
     categories: customCategories,
