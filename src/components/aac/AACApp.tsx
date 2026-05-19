@@ -294,7 +294,7 @@ export default function AACApp() {
 
           {Object.entries(categories).map(([key, val]) => {
             const label = language === 'english' ? val.en : val.hi;
-            const isActive = key === currentCategory && !isCustomView;
+            const isActive = key === currentCategory && !isCustomView && !showFavorites;
             let btnClass = 'bg-card text-foreground shadow-sm';
             if (key === 'core') btnClass = isActive ? 'bg-success/80 text-success-foreground' : 'bg-success text-success-foreground';
             else if (key === 'keyboard') btnClass = isActive ? 'bg-info/80 text-info-foreground' : 'bg-info text-info-foreground';
@@ -303,9 +303,10 @@ export default function AACApp() {
             return (
               <button
                 key={key}
-                onClick={() => { setCurrentCategory(key); setSearchQuery(''); setActiveCustomCategory(null); }}
+                onClick={() => { setCurrentCategory(key); setSearchQuery(''); setActiveCustomCategory(null); setShowFavorites(false); }}
                 className={`px-4 py-2 rounded-lg font-bold text-xs whitespace-nowrap transition-all ${btnClass}`}
               >
+
                 {label}
               </button>
             );
