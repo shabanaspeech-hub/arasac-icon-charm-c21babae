@@ -340,21 +340,103 @@ export default function AACApp() {
           </div>
         )}
 
+        {/* Grid Size Selector (Edit Mode only) */}
+        {editMode && (
+          <div className="flex items-center gap-2 p-3 bg-accent/5 border-b-2 border-border flex-wrap">
+            <span className="text-xs font-bold text-muted-foreground flex items-center gap-1">
+              <LayoutGrid size={12} /> {language === 'english' ? 'Grid Layout:' : 'ग्रिड लेआउट:'}
+            </span>
+            {GRID_OPTIONS.map(size => (
+              <button
+                key={size}
+                onClick={() => setGridSize(size)}
+                className={`px-3 py-1.5 rounded-lg font-bold text-xs transition-all ${gridSize === size ? 'aac-gradient text-primary-foreground shadow-md' : 'bg-card text-foreground border border-border hover:bg-secondary'}`}
+              >
+                {size}
+              </button>
+            ))}
+          </div>
+        )}
+
         {/* Content */}
-        {isCustomView ? (
+        {showFavorites ? (
+          <div className={`grid ${gridColClass} gap-3 p-4 max-h-[500px] overflow-y-auto`}>
+            {favoriteEntries.length === 0 ? (
+              <p className="col-span-full text-center text-muted-foreground py-8">
+                {language === 'english'
+                  ? 'No favorites yet. Long-press any button to add it.'
+                  : 'अभी तक कोई पसंदीदा नहीं। जोड़ने के लिए किसी भी बटन को देर तक दबाएं।'}
+              </p>
+            ) : (
+              favoriteEntries.map((entry, idx) => (
+                <div key={entry.key} className="relative">
+                  {entry.type === 'symbol' ? (
+                    <SymbolCard
+                      symbol={entry.symbol}
+                      language={language}
+                      onClick={() => addToSentence(entry.symbol)}
+                      onLongPress={() => toggleFavorite(entry.key)}
+                      isFavorite
+                    />
+                  ) : (
+                    <CustomItemCard
+                      item={entry.item}
+                      language={language}
+                      editMode={false}
+                      onClick={() => handleCustomItemTap(entry.item)}
+                      onEdit={() => {}}
+                      onDelete={() => {}}
+                      onLongPress={() => toggleFavorite(entry.key)}
+                      isFavorite
+                    />
+                  )}
+                  {editMode && (
+                    <div className="absolute -top-2 -left-2 flex flex-col gap-1">
+                      <button
+                        onClick={() => moveFavorite(entry.key, -1)}
+                        disabled={idx === 0}
+                        className="p-1 bg-primary text-primary-foreground rounded-full shadow disabled:opacity-30"
+                      >
+                        <ChevronUp size={12} />
+                      </button>
+                      <button
+                        onClick={() => moveFavorite(entry.key, 1)}
+                        disabled={idx === favoriteEntries.length - 1}
+                        className="p-1 bg-primary text-primary-foreground rounded-full shadow disabled:opacity-30"
+                      >
+                        <ChevronDown size={12} />
+                      </button>
+                      <button
+                        onClick={() => removeFavorite(entry.key)}
+                        className="p-1 bg-destructive text-destructive-foreground rounded-full shadow"
+                      >
+                        <X size={12} />
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ))
+            )}
+          </div>
+        ) : isCustomView ? (
           <div className="p-4">
-            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3 max-h-[500px] overflow-y-auto">
-              {customItems.map(item => (
-                <CustomItemCard
-                  key={item.id}
-                  item={item}
-                  language={language}
-                  editMode={editMode}
-                  onClick={() => handleCustomItemTap(item)}
-                  onEdit={() => { setEditingItem(item); setAddItemOpen(true); }}
-                  onDelete={() => removeItem(item.id)}
-                />
-              ))}
+            <div className={`grid ${gridColClass} gap-3 max-h-[500px] overflow-y-auto`}>
+              {customItems.map(item => {
+                const favKey = `custom:${item.id}`;
+                return (
+                  <CustomItemCard
+                    key={item.id}
+                    item={item}
+                    language={language}
+                    editMode={editMode}
+                    onClick={() => handleCustomItemTap(item)}
+                    onEdit={() => { setEditingItem(item); setAddItemOpen(true); }}
+                    onDelete={() => removeItem(item.id)}
+                    onLongPress={() => toggleFavorite(favKey)}
+                    isFavorite={isFavorite(favKey)}
+                  />
+                );
+              })}
               {editMode && (
                 <button
                   onClick={() => { setEditingItem(null); setAddItemOpen(true); }}
@@ -374,16 +456,21 @@ export default function AACApp() {
         ) : currentCategory === 'keyboard' ? (
           <Keyboard language={language} onAddWord={addTypedWord} />
         ) : (
-          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3 p-4 max-h-[500px] overflow-y-auto">
+          <div className={`grid ${gridColClass} gap-3 p-4 max-h-[500px] overflow-y-auto`}>
             {displaySymbols.length > 0 ? (
-              displaySymbols.map((symbol, i) => (
-                <SymbolCard
-                  key={`${symbol.en}-${i}`}
-                  symbol={symbol}
-                  language={language}
-                  onClick={() => addToSentence(symbol)}
-                />
-              ))
+              displaySymbols.map((symbol, i) => {
+                const favKey = `sym:${symbol.en}`;
+                return (
+                  <SymbolCard
+                    key={`${symbol.en}-${i}`}
+                    symbol={symbol}
+                    language={language}
+                    onClick={() => addToSentence(symbol)}
+                    onLongPress={() => toggleFavorite(favKey)}
+                    isFavorite={isFavorite(favKey)}
+                  />
+                );
+              })
             ) : (
               <p className="col-span-full text-center text-muted-foreground py-8">
                 {language === 'english' ? 'No symbols found' : 'कोई प्रतीक नहीं मिला'}
@@ -391,6 +478,7 @@ export default function AACApp() {
             )}
           </div>
         )}
+
       </div>
 
       {/* Dialogs */}
