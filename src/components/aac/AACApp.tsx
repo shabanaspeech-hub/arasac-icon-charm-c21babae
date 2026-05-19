@@ -1,10 +1,12 @@
-import { useState, useCallback } from 'react';
-import { Volume2, Delete, Trash2, Mic, Search, Settings, Plus, FolderOpen, Lock, Unlock } from 'lucide-react';
+import { useState, useCallback, useMemo } from 'react';
+import { Volume2, Delete, Trash2, Mic, Search, Settings, Plus, FolderOpen, Lock, Unlock, Star, ChevronUp, ChevronDown, X, LayoutGrid } from 'lucide-react';
 import spectraLogo from '@/assets/spectra-logo.png';
 import { symbols, categories, quickPhrases, type AACSymbol, type CategoryKey } from '@/data/aacData';
 import { useSpeech } from '@/hooks/useSpeech';
 import { useUsageTracker } from '@/hooks/useUsageTracker';
 import { useCustomData } from '@/hooks/useCustomData';
+import { useGridSize, GRID_OPTIONS } from '@/hooks/useGridSize';
+import { useFavorites } from '@/hooks/useFavorites';
 import SymbolCard from './SymbolCard';
 import SentenceBar from './SentenceBar';
 import Keyboard from './Keyboard';
@@ -15,6 +17,7 @@ import InstallBanner from './InstallBanner';
 import AddItemDialog from './AddItemDialog';
 import CategoryManagerDialog from './CategoryManagerDialog';
 import CustomItemCard from './CustomItemCard';
+
 
 const wordColors: Record<string, string> = {
   core: '🟨', noun: '🟦', verb: '🟩', descriptor: '🟪',
