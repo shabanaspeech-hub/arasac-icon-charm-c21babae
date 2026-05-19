@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
+import { Star } from 'lucide-react';
 import { getArasaacImageUrl, useArasaacPictogram } from '@/hooks/useArasaac';
 import type { AACSymbol, WordType } from '@/data/aacData';
 
@@ -6,7 +7,10 @@ interface SymbolCardProps {
   symbol: AACSymbol;
   language: 'english' | 'hindi';
   onClick: () => void;
+  onLongPress?: () => void;
+  isFavorite?: boolean;
 }
+
 
 const colorClassMap: Record<string, string> = {
   core: 'aac-card-core',
