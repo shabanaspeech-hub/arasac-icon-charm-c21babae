@@ -1,4 +1,5 @@
-import { Pencil, Trash2 } from 'lucide-react';
+import { useRef } from 'react';
+import { Pencil, Trash2, Star } from 'lucide-react';
 import type { CustomItem } from '@/lib/customStore';
 
 interface CustomItemCardProps {
@@ -8,6 +9,8 @@ interface CustomItemCardProps {
   onClick: () => void;
   onEdit: () => void;
   onDelete: () => void;
+  onLongPress?: () => void;
+  isFavorite?: boolean;
 }
 
 const colorClassMap: Record<string, string> = {
@@ -23,16 +26,39 @@ const colorClassMap: Record<string, string> = {
   misc: 'aac-card-misc',
 };
 
-export default function CustomItemCard({ item, language, editMode, onClick, onEdit, onDelete }: CustomItemCardProps) {
+export default function CustomItemCard({ item, language, editMode, onClick, onEdit, onDelete, onLongPress, isFavorite }: CustomItemCardProps) {
   const text = language === 'english' ? item.label : item.labelHi;
   const cardClass = colorClassMap[item.wordType] || 'border-border bg-card';
+
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const longPressedRef = useRef(false);
+  const startPress = () => {
+    if (!onLongPress) return;
+    longPressedRef.current = false;
+    timerRef.current = setTimeout(() => { longPressedRef.current = true; onLongPress(); }, 500);
+  };
+  const cancelPress = () => { if (timerRef.current) { clearTimeout(timerRef.current); timerRef.current = null; } };
+  const handleClick = () => {
+    if (longPressedRef.current) { longPressedRef.current = false; return; }
+    onClick();
+  };
 
   return (
     <div className="relative">
       <button
-        onClick={onClick}
+        onClick={handleClick}
+        onMouseDown={startPress}
+        onMouseUp={cancelPress}
+        onMouseLeave={cancelPress}
+        onTouchStart={startPress}
+        onTouchEnd={cancelPress}
+        onTouchCancel={cancelPress}
+        onContextMenu={(e) => e.preventDefault()}
         className={`relative flex flex-col items-center p-3 rounded-xl border-[3px] cursor-pointer transition-all duration-200 hover:-translate-y-1 hover:shadow-lg active:scale-95 w-full ${cardClass}`}
       >
+        {isFavorite && (
+          <Star size={14} className="absolute top-1 right-1 fill-warning text-warning" />
+        )}
         <div className="w-16 h-16 flex items-center justify-center mb-1">
           <img src={item.imageData} alt={item.label} className="w-full h-full object-cover rounded-lg" />
         </div>
