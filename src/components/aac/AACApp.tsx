@@ -283,7 +283,15 @@ export default function AACApp() {
         </div>
 
         {/* Built-in Categories */}
-        <div className="flex overflow-x-auto gap-2 p-3 bg-secondary border-b-2 border-border">
+        <div className="flex overflow-x-auto gap-2 p-3 bg-secondary border-b-2 border-border items-center">
+          <button
+            onClick={() => { setShowFavorites(true); setActiveCustomCategory(null); setSearchQuery(''); }}
+            className={`px-4 py-2 rounded-lg font-bold text-xs whitespace-nowrap transition-all flex items-center gap-1 ${showFavorites ? 'bg-warning text-warning-foreground shadow-md' : 'bg-warning/30 text-warning-foreground'}`}
+          >
+            <Star size={14} className={showFavorites ? 'fill-current' : ''} />
+            {language === 'english' ? `Favorites (${favorites.length})` : `पसंदीदा (${favorites.length})`}
+          </button>
+
           {Object.entries(categories).map(([key, val]) => {
             const label = language === 'english' ? val.en : val.hi;
             const isActive = key === currentCategory && !isCustomView;
