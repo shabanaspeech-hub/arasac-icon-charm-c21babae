@@ -1,10 +1,12 @@
-import { useState, useCallback } from 'react';
-import { Volume2, Delete, Trash2, Mic, Search, Settings, Plus, FolderOpen, Lock, Unlock } from 'lucide-react';
+import { useState, useCallback, useMemo } from 'react';
+import { Volume2, Delete, Trash2, Mic, Search, Settings, Plus, FolderOpen, Lock, Unlock, Star, ChevronUp, ChevronDown, X, LayoutGrid } from 'lucide-react';
 import spectraLogo from '@/assets/spectra-logo.png';
 import { symbols, categories, quickPhrases, type AACSymbol, type CategoryKey } from '@/data/aacData';
 import { useSpeech } from '@/hooks/useSpeech';
 import { useUsageTracker } from '@/hooks/useUsageTracker';
 import { useCustomData } from '@/hooks/useCustomData';
+import { useGridSize, GRID_OPTIONS } from '@/hooks/useGridSize';
+import { useFavorites } from '@/hooks/useFavorites';
 import SymbolCard from './SymbolCard';
 import SentenceBar from './SentenceBar';
 import Keyboard from './Keyboard';
@@ -15,6 +17,7 @@ import InstallBanner from './InstallBanner';
 import AddItemDialog from './AddItemDialog';
 import CategoryManagerDialog from './CategoryManagerDialog';
 import CustomItemCard from './CustomItemCard';
+
 
 const wordColors: Record<string, string> = {
   core: '🟨', noun: '🟦', verb: '🟩', descriptor: '🟪',
@@ -32,11 +35,17 @@ export default function AACApp() {
   const [categoryManagerOpen, setCategoryManagerOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<any>(null);
   const [activeCustomCategory, setActiveCustomCategory] = useState<string | null>(null);
+  const [showFavorites, setShowFavorites] = useState(false);
 
+  const { gridSize, setGridSize, gridColClass } = useGridSize();
+  const { favorites, isFavorite, toggleFavorite, removeFavorite, moveFavorite } = useFavorites();
   const { voiceSettings, setVoiceSettings, speak } = useSpeech();
+
+
   const { trackWord } = useUsageTracker();
   const {
     categories: customCategories,
+    items,
     createCategory,
     renameCategory,
     removeCategory,
@@ -45,6 +54,7 @@ export default function AACApp() {
     removeItem,
     getItemsForCategory,
   } = useCustomData();
+
 
   const addToSentence = useCallback((symbol: AACSymbol) => {
     const text = language === 'english' ? symbol.en : symbol.hi;
@@ -118,8 +128,37 @@ export default function AACApp() {
 
   const displaySymbols = getDisplaySymbols();
   const phrases = language === 'english' ? quickPhrases.en : quickPhrases.hi;
-  const isCustomView = activeCustomCategory !== null;
+  const isCustomView = activeCustomCategory !== null && !showFavorites;
   const customItems = activeCustomCategory ? getItemsForCategory(activeCustomCategory) : [];
+
+  // Lookup maps for favorites
+  const symbolByEn = useMemo(() => {
+    const m = new Map<string, AACSymbol>();
+    Object.keys(symbols).forEach(cat => {
+      if (cat === 'keyboard') return;
+      symbols[cat].forEach(s => { if (!m.has(s.en)) m.set(s.en, s); });
+    });
+    return m;
+  }, []);
+
+  const favoriteEntries = useMemo(() => {
+    return favorites.map(f => {
+      if (f.key.startsWith('sym:')) {
+        const sym = symbolByEn.get(f.key.slice(4));
+        return sym ? { type: 'symbol' as const, key: f.key, symbol: sym } : null;
+      }
+      if (f.key.startsWith('custom:')) {
+        const id = f.key.slice(7);
+        const item = items.find(i => i.id === id);
+        return item ? { type: 'custom' as const, key: f.key, item } : null;
+      }
+      return null;
+    }).filter(Boolean) as Array<
+      | { type: 'symbol'; key: string; symbol: AACSymbol }
+      | { type: 'custom'; key: string; item: any }
+    >;
+  }, [favorites, symbolByEn, items]);
+
 
   // Stats
   let totalWords = 0;
@@ -244,10 +283,18 @@ export default function AACApp() {
         </div>
 
         {/* Built-in Categories */}
-        <div className="flex overflow-x-auto gap-2 p-3 bg-secondary border-b-2 border-border">
+        <div className="flex overflow-x-auto gap-2 p-3 bg-secondary border-b-2 border-border items-center">
+          <button
+            onClick={() => { setShowFavorites(true); setActiveCustomCategory(null); setSearchQuery(''); }}
+            className={`px-4 py-2 rounded-lg font-bold text-xs whitespace-nowrap transition-all flex items-center gap-1 ${showFavorites ? 'bg-warning text-warning-foreground shadow-md' : 'bg-warning/30 text-warning-foreground'}`}
+          >
+            <Star size={14} className={showFavorites ? 'fill-current' : ''} />
+            {language === 'english' ? `Favorites (${favorites.length})` : `पसंदीदा (${favorites.length})`}
+          </button>
+
           {Object.entries(categories).map(([key, val]) => {
             const label = language === 'english' ? val.en : val.hi;
-            const isActive = key === currentCategory && !isCustomView;
+            const isActive = key === currentCategory && !isCustomView && !showFavorites;
             let btnClass = 'bg-card text-foreground shadow-sm';
             if (key === 'core') btnClass = isActive ? 'bg-success/80 text-success-foreground' : 'bg-success text-success-foreground';
             else if (key === 'keyboard') btnClass = isActive ? 'bg-info/80 text-info-foreground' : 'bg-info text-info-foreground';
@@ -256,9 +303,10 @@ export default function AACApp() {
             return (
               <button
                 key={key}
-                onClick={() => { setCurrentCategory(key); setSearchQuery(''); setActiveCustomCategory(null); }}
+                onClick={() => { setCurrentCategory(key); setSearchQuery(''); setActiveCustomCategory(null); setShowFavorites(false); }}
                 className={`px-4 py-2 rounded-lg font-bold text-xs whitespace-nowrap transition-all ${btnClass}`}
               >
+
                 {label}
               </button>
             );
@@ -274,7 +322,7 @@ export default function AACApp() {
               return (
                 <button
                   key={cat.id}
-                  onClick={() => { setActiveCustomCategory(cat.id); setSearchQuery(''); }}
+                  onClick={() => { setActiveCustomCategory(cat.id); setSearchQuery(''); setShowFavorites(false); }}
                   className={`px-4 py-2 rounded-lg font-bold text-xs whitespace-nowrap transition-all ${isActive ? 'aac-gradient text-primary-foreground' : 'bg-card text-foreground shadow-sm border border-border'}`}
                 >
                   {language === 'english' ? cat.nameEn : cat.nameHi}
@@ -292,21 +340,103 @@ export default function AACApp() {
           </div>
         )}
 
+        {/* Grid Size Selector (Edit Mode only) */}
+        {editMode && (
+          <div className="flex items-center gap-2 p-3 bg-accent/5 border-b-2 border-border flex-wrap">
+            <span className="text-xs font-bold text-muted-foreground flex items-center gap-1">
+              <LayoutGrid size={12} /> {language === 'english' ? 'Grid Layout:' : 'ग्रिड लेआउट:'}
+            </span>
+            {GRID_OPTIONS.map(size => (
+              <button
+                key={size}
+                onClick={() => setGridSize(size)}
+                className={`px-3 py-1.5 rounded-lg font-bold text-xs transition-all ${gridSize === size ? 'aac-gradient text-primary-foreground shadow-md' : 'bg-card text-foreground border border-border hover:bg-secondary'}`}
+              >
+                {size}
+              </button>
+            ))}
+          </div>
+        )}
+
         {/* Content */}
-        {isCustomView ? (
+        {showFavorites ? (
+          <div className={`grid ${gridColClass} gap-3 p-4 max-h-[500px] overflow-y-auto`}>
+            {favoriteEntries.length === 0 ? (
+              <p className="col-span-full text-center text-muted-foreground py-8">
+                {language === 'english'
+                  ? 'No favorites yet. Long-press any button to add it.'
+                  : 'अभी तक कोई पसंदीदा नहीं। जोड़ने के लिए किसी भी बटन को देर तक दबाएं।'}
+              </p>
+            ) : (
+              favoriteEntries.map((entry, idx) => (
+                <div key={entry.key} className="relative">
+                  {entry.type === 'symbol' ? (
+                    <SymbolCard
+                      symbol={entry.symbol}
+                      language={language}
+                      onClick={() => addToSentence(entry.symbol)}
+                      onLongPress={() => toggleFavorite(entry.key)}
+                      isFavorite
+                    />
+                  ) : (
+                    <CustomItemCard
+                      item={entry.item}
+                      language={language}
+                      editMode={false}
+                      onClick={() => handleCustomItemTap(entry.item)}
+                      onEdit={() => {}}
+                      onDelete={() => {}}
+                      onLongPress={() => toggleFavorite(entry.key)}
+                      isFavorite
+                    />
+                  )}
+                  {editMode && (
+                    <div className="absolute -top-2 -left-2 flex flex-col gap-1">
+                      <button
+                        onClick={() => moveFavorite(entry.key, -1)}
+                        disabled={idx === 0}
+                        className="p-1 bg-primary text-primary-foreground rounded-full shadow disabled:opacity-30"
+                      >
+                        <ChevronUp size={12} />
+                      </button>
+                      <button
+                        onClick={() => moveFavorite(entry.key, 1)}
+                        disabled={idx === favoriteEntries.length - 1}
+                        className="p-1 bg-primary text-primary-foreground rounded-full shadow disabled:opacity-30"
+                      >
+                        <ChevronDown size={12} />
+                      </button>
+                      <button
+                        onClick={() => removeFavorite(entry.key)}
+                        className="p-1 bg-destructive text-destructive-foreground rounded-full shadow"
+                      >
+                        <X size={12} />
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ))
+            )}
+          </div>
+        ) : isCustomView ? (
           <div className="p-4">
-            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3 max-h-[500px] overflow-y-auto">
-              {customItems.map(item => (
-                <CustomItemCard
-                  key={item.id}
-                  item={item}
-                  language={language}
-                  editMode={editMode}
-                  onClick={() => handleCustomItemTap(item)}
-                  onEdit={() => { setEditingItem(item); setAddItemOpen(true); }}
-                  onDelete={() => removeItem(item.id)}
-                />
-              ))}
+            <div className={`grid ${gridColClass} gap-3 max-h-[500px] overflow-y-auto`}>
+              {customItems.map(item => {
+                const favKey = `custom:${item.id}`;
+                return (
+                  <CustomItemCard
+                    key={item.id}
+                    item={item}
+                    language={language}
+                    editMode={editMode}
+                    onClick={() => handleCustomItemTap(item)}
+                    onEdit={() => { setEditingItem(item); setAddItemOpen(true); }}
+                    onDelete={() => removeItem(item.id)}
+                    onLongPress={() => toggleFavorite(favKey)}
+                    isFavorite={isFavorite(favKey)}
+                  />
+                );
+              })}
               {editMode && (
                 <button
                   onClick={() => { setEditingItem(null); setAddItemOpen(true); }}
@@ -326,16 +456,21 @@ export default function AACApp() {
         ) : currentCategory === 'keyboard' ? (
           <Keyboard language={language} onAddWord={addTypedWord} />
         ) : (
-          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3 p-4 max-h-[500px] overflow-y-auto">
+          <div className={`grid ${gridColClass} gap-3 p-4 max-h-[500px] overflow-y-auto`}>
             {displaySymbols.length > 0 ? (
-              displaySymbols.map((symbol, i) => (
-                <SymbolCard
-                  key={`${symbol.en}-${i}`}
-                  symbol={symbol}
-                  language={language}
-                  onClick={() => addToSentence(symbol)}
-                />
-              ))
+              displaySymbols.map((symbol, i) => {
+                const favKey = `sym:${symbol.en}`;
+                return (
+                  <SymbolCard
+                    key={`${symbol.en}-${i}`}
+                    symbol={symbol}
+                    language={language}
+                    onClick={() => addToSentence(symbol)}
+                    onLongPress={() => toggleFavorite(favKey)}
+                    isFavorite={isFavorite(favKey)}
+                  />
+                );
+              })
             ) : (
               <p className="col-span-full text-center text-muted-foreground py-8">
                 {language === 'english' ? 'No symbols found' : 'कोई प्रतीक नहीं मिला'}
@@ -343,6 +478,7 @@ export default function AACApp() {
             )}
           </div>
         )}
+
       </div>
 
       {/* Dialogs */}
