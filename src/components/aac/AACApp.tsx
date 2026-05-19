@@ -45,6 +45,7 @@ export default function AACApp() {
   const { trackWord } = useUsageTracker();
   const {
     categories: customCategories,
+    items,
     createCategory,
     renameCategory,
     removeCategory,
@@ -53,6 +54,7 @@ export default function AACApp() {
     removeItem,
     getItemsForCategory,
   } = useCustomData();
+
 
   const addToSentence = useCallback((symbol: AACSymbol) => {
     const text = language === 'english' ? symbol.en : symbol.hi;
