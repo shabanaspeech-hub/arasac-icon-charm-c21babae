@@ -25,11 +25,29 @@ const colorClassMap: Record<string, string> = {
   misc: 'aac-card-misc',
 };
 
-export default function SymbolCard({ symbol, language, onClick }: SymbolCardProps) {
+export default function SymbolCard({ symbol, language, onClick, onLongPress, isFavorite }: SymbolCardProps) {
   const text = language === 'english' ? symbol.en : symbol.hi;
   const translation = language === 'english' ? symbol.hi : symbol.en;
   const { data: pictogramId, isLoading } = useArasaacPictogram(symbol.en);
   const [imgError, setImgError] = useState(false);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const longPressedRef = useRef(false);
+
+  const startPress = () => {
+    if (!onLongPress) return;
+    longPressedRef.current = false;
+    timerRef.current = setTimeout(() => {
+      longPressedRef.current = true;
+      onLongPress();
+    }, 500);
+  };
+  const cancelPress = () => {
+    if (timerRef.current) { clearTimeout(timerRef.current); timerRef.current = null; }
+  };
+  const handleClick = () => {
+    if (longPressedRef.current) { longPressedRef.current = false; return; }
+    onClick();
+  };
 
   const cardClass = symbol.wordType
     ? (colorClassMap[symbol.wordType] || 'border-border bg-card')
@@ -37,9 +55,20 @@ export default function SymbolCard({ symbol, language, onClick }: SymbolCardProp
 
   return (
     <button
-      onClick={onClick}
+      onClick={handleClick}
+      onMouseDown={startPress}
+      onMouseUp={cancelPress}
+      onMouseLeave={cancelPress}
+      onTouchStart={startPress}
+      onTouchEnd={cancelPress}
+      onTouchCancel={cancelPress}
+      onContextMenu={(e) => { e.preventDefault(); }}
       className={`relative flex flex-col items-center p-3 rounded-xl border-[3px] cursor-pointer transition-all duration-200 hover:-translate-y-1 hover:shadow-lg active:scale-95 animate-pop-in ${cardClass}`}
     >
+      {isFavorite && (
+        <Star size={14} className="absolute top-1 right-1 fill-warning text-warning" />
+      )}
+
       {symbol.core && (
         <span className="absolute top-1 left-1 bg-success text-success-foreground text-[10px] px-1.5 py-0.5 rounded font-bold">
           CORE
