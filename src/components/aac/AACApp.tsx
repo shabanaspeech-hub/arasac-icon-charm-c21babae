@@ -126,8 +126,37 @@ export default function AACApp() {
 
   const displaySymbols = getDisplaySymbols();
   const phrases = language === 'english' ? quickPhrases.en : quickPhrases.hi;
-  const isCustomView = activeCustomCategory !== null;
+  const isCustomView = activeCustomCategory !== null && !showFavorites;
   const customItems = activeCustomCategory ? getItemsForCategory(activeCustomCategory) : [];
+
+  // Lookup maps for favorites
+  const symbolByEn = useMemo(() => {
+    const m = new Map<string, AACSymbol>();
+    Object.keys(symbols).forEach(cat => {
+      if (cat === 'keyboard') return;
+      symbols[cat].forEach(s => { if (!m.has(s.en)) m.set(s.en, s); });
+    });
+    return m;
+  }, []);
+
+  const favoriteEntries = useMemo(() => {
+    return favorites.map(f => {
+      if (f.key.startsWith('sym:')) {
+        const sym = symbolByEn.get(f.key.slice(4));
+        return sym ? { type: 'symbol' as const, key: f.key, symbol: sym } : null;
+      }
+      if (f.key.startsWith('custom:')) {
+        const id = f.key.slice(7);
+        const item = items.find(i => i.id === id);
+        return item ? { type: 'custom' as const, key: f.key, item } : null;
+      }
+      return null;
+    }).filter(Boolean) as Array<
+      | { type: 'symbol'; key: string; symbol: AACSymbol }
+      | { type: 'custom'; key: string; item: any }
+    >;
+  }, [favorites, symbolByEn, items]);
+
 
   // Stats
   let totalWords = 0;
