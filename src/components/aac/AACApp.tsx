@@ -17,6 +17,7 @@ import InstallBanner from './InstallBanner';
 import AddItemDialog from './AddItemDialog';
 import CategoryManagerDialog from './CategoryManagerDialog';
 import CustomItemCard from './CustomItemCard';
+import PagedGrid, { type PagedGridItem } from './PagedGrid';
 
 
 const wordColors: Record<string, string> = {
@@ -360,17 +361,20 @@ export default function AACApp() {
 
         {/* Content */}
         {showFavorites ? (
-          <div className={`grid ${gridColClass} gap-3 p-4 max-h-[500px] overflow-y-auto`}>
-            {favoriteEntries.length === 0 ? (
-              <p className="col-span-full text-center text-muted-foreground py-8">
-                {language === 'english'
-                  ? 'No favorites yet. Long-press any button to add it.'
-                  : 'अभी तक कोई पसंदीदा नहीं। जोड़ने के लिए किसी भी बटन को देर तक दबाएं।'}
-              </p>
-            ) : (
-              favoriteEntries.map((entry, idx) => (
-                <div key={entry.key} className="relative">
-                  {entry.type === 'symbol' ? (
+          favoriteEntries.length === 0 ? (
+            <p className="text-center text-muted-foreground py-12 px-4">
+              {language === 'english'
+                ? 'No favorites yet. Long-press any button to add it.'
+                : 'अभी तक कोई पसंदीदा नहीं। जोड़ने के लिए किसी भी बटन को देर तक दबाएं।'}
+            </p>
+          ) : (
+            <PagedGrid
+              gridSize={gridSize}
+              storageKey="favorites"
+              items={favoriteEntries.map<PagedGridItem>((entry) => ({
+                id: entry.key,
+                render: () =>
+                  entry.type === 'symbol' ? (
                     <SymbolCard
                       symbol={entry.symbol}
                       language={language}
@@ -385,98 +389,72 @@ export default function AACApp() {
                       editMode={false}
                       onClick={() => handleCustomItemTap(entry.item)}
                       onEdit={() => {}}
-                      onDelete={() => {}}
+                      onDelete={() => removeFavorite(entry.key)}
                       onLongPress={() => toggleFavorite(entry.key)}
                       isFavorite
                     />
-                  )}
-                  {editMode && (
-                    <div className="absolute -top-2 -left-2 flex flex-col gap-1">
-                      <button
-                        onClick={() => moveFavorite(entry.key, -1)}
-                        disabled={idx === 0}
-                        className="p-1 bg-primary text-primary-foreground rounded-full shadow disabled:opacity-30"
-                      >
-                        <ChevronUp size={12} />
-                      </button>
-                      <button
-                        onClick={() => moveFavorite(entry.key, 1)}
-                        disabled={idx === favoriteEntries.length - 1}
-                        className="p-1 bg-primary text-primary-foreground rounded-full shadow disabled:opacity-30"
-                      >
-                        <ChevronDown size={12} />
-                      </button>
-                      <button
-                        onClick={() => removeFavorite(entry.key)}
-                        className="p-1 bg-destructive text-destructive-foreground rounded-full shadow"
-                      >
-                        <X size={12} />
-                      </button>
-                    </div>
-                  )}
-                </div>
-              ))
-            )}
-          </div>
+                  ),
+              }))}
+            />
+          )
         ) : isCustomView ? (
-          <div className="p-4">
-            <div className={`grid ${gridColClass} gap-3 max-h-[500px] overflow-y-auto`}>
-              {customItems.map(item => {
-                const favKey = `custom:${item.id}`;
-                return (
+          customItems.length === 0 && !editMode ? (
+            <p className="text-center text-muted-foreground py-12 px-4">
+              {language === 'english' ? 'No custom items yet. Turn on Edit mode to add items.' : 'अभी तक कोई कस्टम आइटम नहीं। आइटम जोड़ने के लिए एडिट मोड चालू करें।'}
+            </p>
+          ) : (
+            <PagedGrid
+              gridSize={gridSize}
+              storageKey={`custom-${activeCustomCategory}`}
+              items={customItems.map<PagedGridItem>((item) => ({
+                id: `custom:${item.id}`,
+                render: () => (
                   <CustomItemCard
-                    key={item.id}
                     item={item}
                     language={language}
                     editMode={editMode}
                     onClick={() => handleCustomItemTap(item)}
                     onEdit={() => { setEditingItem(item); setAddItemOpen(true); }}
                     onDelete={() => removeItem(item.id)}
-                    onLongPress={() => toggleFavorite(favKey)}
-                    isFavorite={isFavorite(favKey)}
+                    onLongPress={() => toggleFavorite(`custom:${item.id}`)}
+                    isFavorite={isFavorite(`custom:${item.id}`)}
                   />
-                );
-              })}
-              {editMode && (
+                ),
+              }))}
+              trailing={editMode ? (
                 <button
                   onClick={() => { setEditingItem(null); setAddItemOpen(true); }}
-                  className="flex flex-col items-center justify-center p-3 rounded-xl border-[3px] border-dashed border-primary/40 cursor-pointer transition-all hover:border-primary hover:bg-primary/5 min-h-[120px]"
+                  className="flex flex-col items-center justify-center h-full w-full p-3 rounded-xl border-[3px] border-dashed border-primary/40 cursor-pointer transition-all hover:border-primary hover:bg-primary/5"
                 >
                   <Plus size={32} className="text-primary/60 mb-1" />
                   <span className="text-xs font-bold text-primary/60">Add Item</span>
                 </button>
-              )}
-              {customItems.length === 0 && !editMode && (
-                <p className="col-span-full text-center text-muted-foreground py-8">
-                  {language === 'english' ? 'No custom items yet. Turn on Edit mode to add items.' : 'अभी तक कोई कस्टम आइटम नहीं। आइटम जोड़ने के लिए एडिट मोड चालू करें।'}
-                </p>
-              )}
-            </div>
-          </div>
+              ) : null}
+            />
+          )
         ) : currentCategory === 'keyboard' ? (
           <Keyboard language={language} onAddWord={addTypedWord} />
+        ) : displaySymbols.length === 0 ? (
+          <p className="text-center text-muted-foreground py-12 px-4">
+            {language === 'english' ? 'No symbols found' : 'कोई प्रतीक नहीं मिला'}
+          </p>
         ) : (
-          <div className={`grid ${gridColClass} gap-3 p-4 max-h-[500px] overflow-y-auto`}>
-            {displaySymbols.length > 0 ? (
-              displaySymbols.map((symbol, i) => {
-                const favKey = `sym:${symbol.en}`;
-                return (
-                  <SymbolCard
-                    key={`${symbol.en}-${i}`}
-                    symbol={symbol}
-                    language={language}
-                    onClick={() => addToSentence(symbol)}
-                    onLongPress={() => toggleFavorite(favKey)}
-                    isFavorite={isFavorite(favKey)}
-                  />
-                );
-              })
-            ) : (
-              <p className="col-span-full text-center text-muted-foreground py-8">
-                {language === 'english' ? 'No symbols found' : 'कोई प्रतीक नहीं मिला'}
-              </p>
-            )}
-          </div>
+          <PagedGrid
+            gridSize={gridSize}
+            storageKey={searchQuery.trim() ? `search` : `cat-${currentCategory}`}
+            items={displaySymbols.map<PagedGridItem>((symbol) => ({
+              id: `sym:${symbol.en}`,
+              render: () => (
+                <SymbolCard
+                  symbol={symbol}
+                  language={language}
+                  onClick={() => addToSentence(symbol)}
+                  onLongPress={() => toggleFavorite(`sym:${symbol.en}`)}
+                  isFavorite={isFavorite(`sym:${symbol.en}`)}
+                />
+              ),
+            }))}
+          />
         )}
 
       </div>

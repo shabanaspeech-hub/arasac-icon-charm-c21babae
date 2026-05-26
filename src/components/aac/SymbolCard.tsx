@@ -63,10 +63,10 @@ export default function SymbolCard({ symbol, language, onClick, onLongPress, isF
       onTouchEnd={cancelPress}
       onTouchCancel={cancelPress}
       onContextMenu={(e) => { e.preventDefault(); }}
-      className={`relative flex flex-col items-center p-3 rounded-xl border-[3px] cursor-pointer transition-all duration-200 hover:-translate-y-1 hover:shadow-lg active:scale-95 animate-pop-in ${cardClass}`}
+      className={`relative flex flex-col items-center justify-center p-2 rounded-xl border-[3px] cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg active:scale-95 animate-pop-in w-full h-full min-h-[110px] ${cardClass}`}
     >
       {isFavorite && (
-        <Star size={14} className="absolute top-1 right-1 fill-warning text-warning" />
+        <Star size={16} className="absolute top-1.5 right-1.5 fill-warning text-warning" />
       )}
 
       {symbol.core && (
@@ -75,23 +75,24 @@ export default function SymbolCard({ symbol, language, onClick, onLongPress, isF
         </span>
       )}
 
-      <div className="w-16 h-16 flex items-center justify-center mb-1">
+      <div className="flex-1 w-full flex items-center justify-center min-h-0 mb-1">
         {pictogramId && !imgError ? (
           <img
             src={getArasaacImageUrl(pictogramId, { skin: symbol.wordType === 'feeling' || symbol.wordType === 'social' })}
             alt={symbol.en}
-            className="w-full h-full object-contain"
+            className="max-w-full max-h-full object-contain pointer-events-none"
             onError={() => setImgError(true)}
             loading="lazy"
+            draggable={false}
           />
         ) : isLoading ? (
           <div className="w-12 h-12 rounded-full bg-muted animate-pulse" />
         ) : (
-          <span className="text-4xl">{symbol.emoji}</span>
+          <span className="text-5xl sm:text-6xl">{symbol.emoji}</span>
         )}
       </div>
 
-      <span className="text-sm font-bold text-foreground text-center leading-tight">{text}</span>
+      <span className="text-sm sm:text-base font-bold text-foreground text-center leading-tight">{text}</span>
       <span className="text-[11px] text-muted-foreground text-center">{translation}</span>
     </button>
   );
