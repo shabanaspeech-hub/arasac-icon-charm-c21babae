@@ -44,7 +44,7 @@ export default function CustomItemCard({ item, language, editMode, onClick, onEd
   };
 
   return (
-    <div className="relative">
+    <div className="relative h-full w-full">
       <button
         onClick={handleClick}
         onMouseDown={startPress}
@@ -54,15 +54,15 @@ export default function CustomItemCard({ item, language, editMode, onClick, onEd
         onTouchEnd={cancelPress}
         onTouchCancel={cancelPress}
         onContextMenu={(e) => e.preventDefault()}
-        className={`relative flex flex-col items-center p-3 rounded-xl border-[3px] cursor-pointer transition-all duration-200 hover:-translate-y-1 hover:shadow-lg active:scale-95 w-full ${cardClass}`}
+        className={`relative flex flex-col items-center justify-center p-2 rounded-xl border-[3px] cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg active:scale-95 w-full h-full min-h-[110px] ${cardClass}`}
       >
         {isFavorite && (
-          <Star size={14} className="absolute top-1 right-1 fill-warning text-warning" />
+          <Star size={16} className="absolute top-1.5 right-1.5 fill-warning text-warning" />
         )}
-        <div className="w-16 h-16 flex items-center justify-center mb-1">
-          <img src={item.imageData} alt={item.label} className="w-full h-full object-cover rounded-lg" />
+        <div className="flex-1 w-full flex items-center justify-center min-h-0 mb-1">
+          <img src={item.imageData} alt={item.label} draggable={false} className="max-w-full max-h-full object-cover rounded-lg pointer-events-none" />
         </div>
-        <span className="text-sm font-bold text-foreground text-center leading-tight">{text}</span>
+        <span className="text-sm sm:text-base font-bold text-foreground text-center leading-tight">{text}</span>
       </button>
 
       {editMode && (
