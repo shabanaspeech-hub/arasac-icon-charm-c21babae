@@ -66,6 +66,7 @@ export default function AACApp() {
     const text = language === 'english' ? symbol.en : symbol.hi;
     speak(text, language);
     trackWord(text);
+    setAssistantTrigger(symbol.en);
     setSentence(prev => [...prev, symbol]);
   }, [language, speak, trackWord]);
 
