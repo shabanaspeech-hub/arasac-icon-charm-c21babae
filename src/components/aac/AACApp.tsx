@@ -19,7 +19,7 @@ import AddItemDialog from './AddItemDialog';
 import CategoryManagerDialog from './CategoryManagerDialog';
 import CustomItemCard from './CustomItemCard';
 import PagedGrid, { type PagedGridItem } from './PagedGrid';
-import AssistantPanel from './AssistantPanel';
+import InlineAssistantStrip from './InlineAssistantStrip';
 
 
 const wordColors: Record<string, string> = {
