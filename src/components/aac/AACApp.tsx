@@ -39,7 +39,6 @@ export default function AACApp() {
   const [editingItem, setEditingItem] = useState<any>(null);
   const [activeCustomCategory, setActiveCustomCategory] = useState<string | null>(null);
   const [showFavorites, setShowFavorites] = useState(false);
-  const [assistantOpen, setAssistantOpen] = useState(false);
   const [assistantTrigger, setAssistantTrigger] = useState<string>('');
 
   const { gridSize, setGridSize, gridColClass } = useGridSize();
