@@ -273,20 +273,19 @@ export default function AACApp() {
           <button onClick={() => setVoiceModalOpen(true)} className="flex items-center gap-1.5 px-4 py-2 bg-info text-info-foreground rounded-lg font-bold text-sm hover:brightness-95 transition-all">
             <Mic size={16} /> Voice
           </button>
-          {childProfile.assistantEnabled && (
-            <button
-              onClick={() => { setAssistantTrigger(assistantTrigger || currentCategory); setAssistantOpen(true); }}
-              className="flex items-center gap-1.5 px-4 py-2 bg-gradient-to-r from-primary to-accent text-primary-foreground rounded-lg font-bold text-sm hover:brightness-95 transition-all shadow-md"
-            >
-              <Sparkles size={16} /> {language === 'english' ? 'Help Me Say More' : 'और कहने में मदद'}
-            </button>
-          )}
           <button
-            onClick={() => { setAssistantTrigger(assistantTrigger || currentCategory); setAssistantOpen(true); }}
-            title="Assistant settings"
-            className="flex items-center gap-1.5 px-3 py-2 bg-card border border-border text-foreground rounded-lg font-bold text-sm hover:bg-secondary transition-all"
+            onClick={toggleAssistant}
+            title={language === 'english' ? 'Toggle Communication Assistant' : 'सहायक चालू/बंद करें'}
+            className={`flex items-center gap-1.5 px-4 py-2 rounded-lg font-bold text-sm transition-all shadow-sm ${
+              childProfile.assistantEnabled
+                ? 'bg-gradient-to-r from-primary to-accent text-primary-foreground'
+                : 'bg-card border border-border text-muted-foreground'
+            }`}
           >
-            <Sparkles size={14} className="text-primary" />
+            <Sparkles size={16} />
+            {language === 'english'
+              ? `Assistant ${childProfile.assistantEnabled ? 'ON' : 'OFF'}`
+              : `सहायक ${childProfile.assistantEnabled ? 'चालू' : 'बंद'}`}
           </button>
         </div>
 
