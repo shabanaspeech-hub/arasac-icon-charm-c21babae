@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { useChildProfile, type ChildProfile } from '@/hooks/useChildProfile';
 import { useAssistantTracker } from '@/hooks/useAssistantTracker';
 import { generateSuggestions, generateFromNeed, type AssistantResult } from '@/lib/assistantEngine';
+import { VisualSuggestionCard, VisualSentenceStrip } from './VisualSuggestionCard';
 
 const SAVED_KEY = 'spectra-assistant-saved';
 
@@ -24,34 +25,11 @@ export interface AssistantPanelProps {
   onAddToFavorites: (text: string) => void;
 }
 
-function SuggestionButton({ text, onTap, onAdd, onFav }: { text: string; onTap: () => void; onAdd?: () => void; onFav?: () => void }) {
-  return (
-    <div className="group flex items-stretch gap-1">
-      <button
-        onClick={onTap}
-        className="flex-1 text-left px-4 py-3 bg-card border-2 border-primary/30 rounded-xl font-bold text-base hover:bg-primary/5 hover:border-primary transition-all flex items-center gap-2 min-h-[56px]"
-      >
-        <Volume2 size={18} className="text-primary shrink-0" />
-        <span className="text-foreground">{text}</span>
-      </button>
-      {onAdd && (
-        <button onClick={onAdd} title="Add to board" className="px-3 bg-success/10 text-success-foreground border-2 border-success/40 rounded-xl hover:bg-success/20">
-          <Plus size={16} />
-        </button>
-      )}
-      {onFav && (
-        <button onClick={onFav} title="Favorite" className="px-3 bg-warning/10 text-warning-foreground border-2 border-warning/40 rounded-xl hover:bg-warning/20">
-          <Star size={16} />
-        </button>
-      )}
-    </div>
-  );
-}
-
-function SuggestionList({
+function SectionGrid({
   title,
   items,
   type,
+  variant,
   onTap,
   onAdd,
   onFav,
@@ -59,25 +37,42 @@ function SuggestionList({
   title: string;
   items: string[];
   type: 'word' | 'phrase' | 'sentence';
+  variant: 'card' | 'strip';
   onTap: (s: string, type: 'word' | 'phrase' | 'sentence') => void;
   onAdd?: (s: string, type: 'word' | 'phrase' | 'sentence') => void;
   onFav?: (s: string) => void;
 }) {
   if (!items.length) return null;
   return (
-    <div className="mb-3">
+    <div className="mb-4">
       <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-wide mb-2">{title}</h4>
-      <div className="grid gap-2">
-        {items.map((it, i) => (
-          <SuggestionButton
-            key={`${it}-${i}`}
-            text={it}
-            onTap={() => onTap(it, type)}
-            onAdd={onAdd ? () => onAdd(it, type) : undefined}
-            onFav={onFav ? () => onFav(it) : undefined}
-          />
-        ))}
-      </div>
+      {variant === 'strip' ? (
+        <div className="grid gap-2">
+          {items.map((it, i) => (
+            <VisualSentenceStrip
+              key={`${it}-${i}`}
+              text={it}
+              onTapWord={(w) => onTap(w, 'word')}
+              onTapStrip={() => onTap(it, type)}
+              onAdd={onAdd ? () => onAdd(it, type) : undefined}
+              onFav={onFav ? () => onFav(it) : undefined}
+            />
+          ))}
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+          {items.map((it, i) => (
+            <VisualSuggestionCard
+              key={`${it}-${i}`}
+              text={it}
+              size={type === 'word' ? 'md' : 'sm'}
+              onTap={() => onTap(it, type)}
+              onAdd={onAdd ? () => onAdd(it, type) : undefined}
+              onFav={onFav ? () => onFav(it) : undefined}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -92,12 +87,12 @@ function LevelBlock({ heading, accent, set, onTap, onAdd, onFav }: {
 }) {
   return (
     <div className={`p-3 rounded-xl border-2 ${accent} mb-3`}>
-      <h3 className="text-sm font-extrabold mb-2 flex items-center gap-2">
+      <h3 className="text-sm font-extrabold mb-3 flex items-center gap-2">
         <Sparkles size={14} /> {heading}
       </h3>
-      <SuggestionList title="Words" items={set.words} type="word" onTap={onTap} onAdd={onAdd} onFav={onFav} />
-      <SuggestionList title="Phrases" items={set.phrases} type="phrase" onTap={onTap} onAdd={onAdd} onFav={onFav} />
-      <SuggestionList title="Sentences" items={set.sentences} type="sentence" onTap={onTap} onAdd={onAdd} onFav={onFav} />
+      <SectionGrid title="Words" items={set.words} type="word" variant="card" onTap={onTap} onAdd={onAdd} onFav={onFav} />
+      <SectionGrid title="Phrases" items={set.phrases} type="phrase" variant="card" onTap={onTap} onAdd={onAdd} onFav={onFav} />
+      <SectionGrid title="Sentences" items={set.sentences} type="sentence" variant="strip" onTap={onTap} onAdd={onAdd} onFav={onFav} />
     </div>
   );
 }
