@@ -45,7 +45,7 @@ export default function AACApp() {
   const { gridSize, setGridSize, gridColClass } = useGridSize();
   const { favorites, isFavorite, toggleFavorite, removeFavorite, moveFavorite } = useFavorites();
   const { voiceSettings, setVoiceSettings, speak } = useSpeech();
-  const { profile: childProfile } = useChildProfile();
+  const { profile: childProfile, toggleAssistant } = useChildProfile();
 
 
   const { trackWord } = useUsageTracker();
