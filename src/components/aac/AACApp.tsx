@@ -512,15 +512,6 @@ export default function AACApp() {
         onDelete={removeCategory}
       />
 
-      <AssistantPanel
-        open={assistantOpen}
-        onClose={() => setAssistantOpen(false)}
-        trigger={assistantTrigger}
-        language={language}
-        onSpeak={(t) => speak(t, language)}
-        onAddToBoard={(t) => addPhrase(t)}
-        onAddToFavorites={(t) => addPhrase(t)}
-      />
 
       <InstallBanner />
     </div>
