@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { useChildProfile, type ChildProfile } from '@/hooks/useChildProfile';
 import { useAssistantTracker } from '@/hooks/useAssistantTracker';
 import { generateSuggestions, generateFromNeed, type AssistantResult } from '@/lib/assistantEngine';
+import { VisualSuggestionCard, VisualSentenceStrip } from './VisualSuggestionCard';
 
 const SAVED_KEY = 'spectra-assistant-saved';
 
