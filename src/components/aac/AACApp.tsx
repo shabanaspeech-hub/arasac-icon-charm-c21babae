@@ -244,6 +244,14 @@ export default function AACApp() {
         {/* Sentence Bar */}
         <SentenceBar sentence={sentence} language={language} onRemoveWord={removeWord} />
 
+        {/* Inline Communication Expansion (Assistant ON only, no popups) */}
+        <InlineAssistantStrip
+          trigger={assistantTrigger}
+          language={language}
+          onSpeak={(t) => speak(t, language)}
+          onAddToBoard={(t) => addPhrase(t)}
+        />
+
         {/* Smart Suggestions */}
         <SuggestionBar
           lastWord={sentence.length > 0 ? sentence[sentence.length - 1] : null}
