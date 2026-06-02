@@ -19,7 +19,7 @@ import AddItemDialog from './AddItemDialog';
 import CategoryManagerDialog from './CategoryManagerDialog';
 import CustomItemCard from './CustomItemCard';
 import PagedGrid, { type PagedGridItem } from './PagedGrid';
-import AssistantPanel from './AssistantPanel';
+import InlineAssistantStrip from './InlineAssistantStrip';
 
 
 const wordColors: Record<string, string> = {
@@ -39,13 +39,12 @@ export default function AACApp() {
   const [editingItem, setEditingItem] = useState<any>(null);
   const [activeCustomCategory, setActiveCustomCategory] = useState<string | null>(null);
   const [showFavorites, setShowFavorites] = useState(false);
-  const [assistantOpen, setAssistantOpen] = useState(false);
   const [assistantTrigger, setAssistantTrigger] = useState<string>('');
 
   const { gridSize, setGridSize, gridColClass } = useGridSize();
   const { favorites, isFavorite, toggleFavorite, removeFavorite, moveFavorite } = useFavorites();
   const { voiceSettings, setVoiceSettings, speak } = useSpeech();
-  const { profile: childProfile } = useChildProfile();
+  const { profile: childProfile, toggleAssistant } = useChildProfile();
 
 
   const { trackWord } = useUsageTracker();
@@ -244,6 +243,14 @@ export default function AACApp() {
         {/* Sentence Bar */}
         <SentenceBar sentence={sentence} language={language} onRemoveWord={removeWord} />
 
+        {/* Inline Communication Expansion (Assistant ON only, no popups) */}
+        <InlineAssistantStrip
+          trigger={assistantTrigger}
+          language={language}
+          onSpeak={(t) => speak(t, language)}
+          onAddToBoard={(t) => addPhrase(t)}
+        />
+
         {/* Smart Suggestions */}
         <SuggestionBar
           lastWord={sentence.length > 0 ? sentence[sentence.length - 1] : null}
@@ -265,20 +272,19 @@ export default function AACApp() {
           <button onClick={() => setVoiceModalOpen(true)} className="flex items-center gap-1.5 px-4 py-2 bg-info text-info-foreground rounded-lg font-bold text-sm hover:brightness-95 transition-all">
             <Mic size={16} /> Voice
           </button>
-          {childProfile.assistantEnabled && (
-            <button
-              onClick={() => { setAssistantTrigger(assistantTrigger || currentCategory); setAssistantOpen(true); }}
-              className="flex items-center gap-1.5 px-4 py-2 bg-gradient-to-r from-primary to-accent text-primary-foreground rounded-lg font-bold text-sm hover:brightness-95 transition-all shadow-md"
-            >
-              <Sparkles size={16} /> {language === 'english' ? 'Help Me Say More' : 'और कहने में मदद'}
-            </button>
-          )}
           <button
-            onClick={() => { setAssistantTrigger(assistantTrigger || currentCategory); setAssistantOpen(true); }}
-            title="Assistant settings"
-            className="flex items-center gap-1.5 px-3 py-2 bg-card border border-border text-foreground rounded-lg font-bold text-sm hover:bg-secondary transition-all"
+            onClick={toggleAssistant}
+            title={language === 'english' ? 'Toggle Communication Assistant' : 'सहायक चालू/बंद करें'}
+            className={`flex items-center gap-1.5 px-4 py-2 rounded-lg font-bold text-sm transition-all shadow-sm ${
+              childProfile.assistantEnabled
+                ? 'bg-gradient-to-r from-primary to-accent text-primary-foreground'
+                : 'bg-card border border-border text-muted-foreground'
+            }`}
           >
-            <Sparkles size={14} className="text-primary" />
+            <Sparkles size={16} />
+            {language === 'english'
+              ? `Assistant ${childProfile.assistantEnabled ? 'ON' : 'OFF'}`
+              : `सहायक ${childProfile.assistantEnabled ? 'चालू' : 'बंद'}`}
           </button>
         </div>
 
@@ -505,15 +511,6 @@ export default function AACApp() {
         onDelete={removeCategory}
       />
 
-      <AssistantPanel
-        open={assistantOpen}
-        onClose={() => setAssistantOpen(false)}
-        trigger={assistantTrigger}
-        language={language}
-        onSpeak={(t) => speak(t, language)}
-        onAddToBoard={(t) => addPhrase(t)}
-        onAddToFavorites={(t) => addPhrase(t)}
-      />
 
       <InstallBanner />
     </div>
