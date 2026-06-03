@@ -404,7 +404,9 @@ export default function AACApp() {
         )}
 
         {/* Content */}
-        {showFavorites ? (
+        {showBeginner ? (
+          <BeginnerBoard language={language} onSelect={handleBeginnerTap} />
+        ) : showFavorites ? (
           favoriteEntries.length === 0 ? (
             <p className="text-center text-muted-foreground py-12 px-4">
               {language === 'english'
