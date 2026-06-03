@@ -20,6 +20,7 @@ import CategoryManagerDialog from './CategoryManagerDialog';
 import CustomItemCard from './CustomItemCard';
 import PagedGrid, { type PagedGridItem } from './PagedGrid';
 import InlineAssistantStrip from './InlineAssistantStrip';
+import BeginnerBoard, { type BeginnerWord } from './BeginnerBoard';
 
 
 const wordColors: Record<string, string> = {
@@ -39,6 +40,7 @@ export default function AACApp() {
   const [editingItem, setEditingItem] = useState<any>(null);
   const [activeCustomCategory, setActiveCustomCategory] = useState<string | null>(null);
   const [showFavorites, setShowFavorites] = useState(false);
+  const [showBeginner, setShowBeginner] = useState(true);
   const [assistantTrigger, setAssistantTrigger] = useState<string>('');
 
   const { gridSize, setGridSize, gridColClass } = useGridSize();
@@ -102,6 +104,14 @@ export default function AACApp() {
     }
     trackWord(item.label);
     setSentence(prev => [...prev, { emoji: '📷', en: item.label, hi: item.labelHi, img: item.imageData, wordType: item.wordType }]);
+  }, [language, speak, trackWord]);
+
+  const handleBeginnerTap = useCallback((w: BeginnerWord) => {
+    const text = language === 'english' ? w.en : w.hi;
+    speak(text, language);
+    trackWord(w.en);
+    setAssistantTrigger(w.en);
+    setSentence(prev => [...prev, { emoji: '🌟', en: w.en, hi: w.hi, wordType: 'core' }]);
   }, [language, speak, trackWord]);
 
   const handleSaveItem = useCallback(async (data: any) => {
@@ -313,7 +323,14 @@ export default function AACApp() {
         {/* Built-in Categories */}
         <div className="flex overflow-x-auto gap-2 p-3 bg-secondary border-b-2 border-border items-center">
           <button
-            onClick={() => { setShowFavorites(true); setActiveCustomCategory(null); setSearchQuery(''); }}
+            onClick={() => { setShowBeginner(true); setShowFavorites(false); setActiveCustomCategory(null); setSearchQuery(''); }}
+            className={`px-4 py-2 rounded-lg font-bold text-xs whitespace-nowrap transition-all flex items-center gap-1 ${showBeginner ? 'bg-primary text-primary-foreground shadow-md' : 'bg-primary/20 text-primary'}`}
+          >
+            🌟 {language === 'english' ? 'Beginner' : 'शुरुआती'}
+          </button>
+
+          <button
+            onClick={() => { setShowFavorites(true); setShowBeginner(false); setActiveCustomCategory(null); setSearchQuery(''); }}
             className={`px-4 py-2 rounded-lg font-bold text-xs whitespace-nowrap transition-all flex items-center gap-1 ${showFavorites ? 'bg-warning text-warning-foreground shadow-md' : 'bg-warning/30 text-warning-foreground'}`}
           >
             <Star size={14} className={showFavorites ? 'fill-current' : ''} />
@@ -322,7 +339,7 @@ export default function AACApp() {
 
           {Object.entries(categories).map(([key, val]) => {
             const label = language === 'english' ? val.en : val.hi;
-            const isActive = key === currentCategory && !isCustomView && !showFavorites;
+            const isActive = key === currentCategory && !isCustomView && !showFavorites && !showBeginner;
             let btnClass = 'bg-card text-foreground shadow-sm';
             if (key === 'core') btnClass = isActive ? 'bg-success/80 text-success-foreground' : 'bg-success text-success-foreground';
             else if (key === 'keyboard') btnClass = isActive ? 'bg-info/80 text-info-foreground' : 'bg-info text-info-foreground';
@@ -331,7 +348,7 @@ export default function AACApp() {
             return (
               <button
                 key={key}
-                onClick={() => { setCurrentCategory(key); setSearchQuery(''); setActiveCustomCategory(null); setShowFavorites(false); }}
+                onClick={() => { setCurrentCategory(key); setSearchQuery(''); setActiveCustomCategory(null); setShowFavorites(false); setShowBeginner(false); }}
                 className={`px-4 py-2 rounded-lg font-bold text-xs whitespace-nowrap transition-all ${btnClass}`}
               >
 
@@ -350,7 +367,7 @@ export default function AACApp() {
               return (
                 <button
                   key={cat.id}
-                  onClick={() => { setActiveCustomCategory(cat.id); setSearchQuery(''); setShowFavorites(false); }}
+                  onClick={() => { setActiveCustomCategory(cat.id); setSearchQuery(''); setShowFavorites(false); setShowBeginner(false); }}
                   className={`px-4 py-2 rounded-lg font-bold text-xs whitespace-nowrap transition-all ${isActive ? 'aac-gradient text-primary-foreground' : 'bg-card text-foreground shadow-sm border border-border'}`}
                 >
                   {language === 'english' ? cat.nameEn : cat.nameHi}
@@ -387,7 +404,9 @@ export default function AACApp() {
         )}
 
         {/* Content */}
-        {showFavorites ? (
+        {showBeginner ? (
+          <BeginnerBoard language={language} onSelect={handleBeginnerTap} />
+        ) : showFavorites ? (
           favoriteEntries.length === 0 ? (
             <p className="text-center text-muted-foreground py-12 px-4">
               {language === 'english'
