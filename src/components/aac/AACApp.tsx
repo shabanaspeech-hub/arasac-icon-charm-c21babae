@@ -106,6 +106,14 @@ export default function AACApp() {
     setSentence(prev => [...prev, { emoji: '📷', en: item.label, hi: item.labelHi, img: item.imageData, wordType: item.wordType }]);
   }, [language, speak, trackWord]);
 
+  const handleBeginnerTap = useCallback((w: BeginnerWord) => {
+    const text = language === 'english' ? w.en : w.hi;
+    speak(text, language);
+    trackWord(w.en);
+    setAssistantTrigger(w.en);
+    setSentence(prev => [...prev, { emoji: '🌟', en: w.en, hi: w.hi, wordType: 'core' }]);
+  }, [language, speak, trackWord]);
+
   const handleSaveItem = useCallback(async (data: any) => {
     if (!activeCustomCategory) return;
     if (editingItem) {
