@@ -367,7 +367,7 @@ export default function AACApp() {
               return (
                 <button
                   key={cat.id}
-                  onClick={() => { setActiveCustomCategory(cat.id); setSearchQuery(''); setShowFavorites(false); }}
+                  onClick={() => { setActiveCustomCategory(cat.id); setSearchQuery(''); setShowFavorites(false); setShowBeginner(false); }}
                   className={`px-4 py-2 rounded-lg font-bold text-xs whitespace-nowrap transition-all ${isActive ? 'aac-gradient text-primary-foreground' : 'bg-card text-foreground shadow-sm border border-border'}`}
                 >
                   {language === 'english' ? cat.nameEn : cat.nameHi}
