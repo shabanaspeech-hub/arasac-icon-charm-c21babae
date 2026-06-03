@@ -323,7 +323,14 @@ export default function AACApp() {
         {/* Built-in Categories */}
         <div className="flex overflow-x-auto gap-2 p-3 bg-secondary border-b-2 border-border items-center">
           <button
-            onClick={() => { setShowFavorites(true); setActiveCustomCategory(null); setSearchQuery(''); }}
+            onClick={() => { setShowBeginner(true); setShowFavorites(false); setActiveCustomCategory(null); setSearchQuery(''); }}
+            className={`px-4 py-2 rounded-lg font-bold text-xs whitespace-nowrap transition-all flex items-center gap-1 ${showBeginner ? 'bg-primary text-primary-foreground shadow-md' : 'bg-primary/20 text-primary'}`}
+          >
+            🌟 {language === 'english' ? 'Beginner' : 'शुरुआती'}
+          </button>
+
+          <button
+            onClick={() => { setShowFavorites(true); setShowBeginner(false); setActiveCustomCategory(null); setSearchQuery(''); }}
             className={`px-4 py-2 rounded-lg font-bold text-xs whitespace-nowrap transition-all flex items-center gap-1 ${showFavorites ? 'bg-warning text-warning-foreground shadow-md' : 'bg-warning/30 text-warning-foreground'}`}
           >
             <Star size={14} className={showFavorites ? 'fill-current' : ''} />
@@ -332,7 +339,7 @@ export default function AACApp() {
 
           {Object.entries(categories).map(([key, val]) => {
             const label = language === 'english' ? val.en : val.hi;
-            const isActive = key === currentCategory && !isCustomView && !showFavorites;
+            const isActive = key === currentCategory && !isCustomView && !showFavorites && !showBeginner;
             let btnClass = 'bg-card text-foreground shadow-sm';
             if (key === 'core') btnClass = isActive ? 'bg-success/80 text-success-foreground' : 'bg-success text-success-foreground';
             else if (key === 'keyboard') btnClass = isActive ? 'bg-info/80 text-info-foreground' : 'bg-info text-info-foreground';
@@ -341,7 +348,7 @@ export default function AACApp() {
             return (
               <button
                 key={key}
-                onClick={() => { setCurrentCategory(key); setSearchQuery(''); setActiveCustomCategory(null); setShowFavorites(false); }}
+                onClick={() => { setCurrentCategory(key); setSearchQuery(''); setActiveCustomCategory(null); setShowFavorites(false); setShowBeginner(false); }}
                 className={`px-4 py-2 rounded-lg font-bold text-xs whitespace-nowrap transition-all ${btnClass}`}
               >
 
