@@ -20,6 +20,7 @@ import CategoryManagerDialog from './CategoryManagerDialog';
 import CustomItemCard from './CustomItemCard';
 import PagedGrid, { type PagedGridItem } from './PagedGrid';
 import InlineAssistantStrip from './InlineAssistantStrip';
+import BeginnerBoard, { type BeginnerWord } from './BeginnerBoard';
 
 
 const wordColors: Record<string, string> = {
