@@ -1,186 +1,145 @@
 // Communication Assistant engine.
-// V1: structured developmental suggestions. Designed so an AI provider
-// (Lovable AI Gateway, etc.) can be swapped in later by replacing
-// `generateSuggestions` without touching UI consumers.
+// V2: Context-specific dynamic suggestions. For any selected word the engine
+// produces three buckets:
+//   - relatedWords: vocabulary closely tied to the word (descriptor+word, action+word, variants)
+//   - currentLevel: short 2-word combinations the child can produce now
+//   - expandedLanguage: full sentences modeling next-level grammar
+// Designed so an AI provider can replace `generateSuggestions` later without
+// touching UI consumers.
 
 import type { ChildProfile } from '@/hooks/useChildProfile';
 
-export interface SuggestionSet {
-  words: string[];
-  phrases: string[];
-  sentences: string[];
+export interface AssistantResult {
+  trigger: string;
+  relatedWords: string[];
+  currentLevel: string[];
+  expandedLanguage: string[];
 }
 
-export interface AssistantResult {
-  currentLevel: SuggestionSet;
-  nextLevel: SuggestionSet;
-  targets: {
-    wordsToLearn: string[];
-    phrasesToModel: string[];
-    goals: string[];
+// Curated overrides for common nouns/verbs/descriptors. When present these
+// take priority over the generic templates below.
+const OVERRIDES: Record<string, Partial<AssistantResult>> = {
+  ball:    { relatedWords: ['Big Ball', 'Red Ball', 'Throw Ball', 'Kick Ball', 'My Ball'] },
+  apple:   { relatedWords: ['Red Apple', 'Green Apple', 'Eat Apple', 'More Apple', 'Cut Apple'] },
+  car:     { relatedWords: ['Big Car', 'Red Car', 'Fast Car', 'My Car', 'Toy Car'] },
+  water:   { relatedWords: ['Cold Water', 'Hot Water', 'More Water', 'Drink Water', 'My Water'] },
+  milk:    { relatedWords: ['Cold Milk', 'Warm Milk', 'More Milk', 'Drink Milk', 'My Milk'] },
+  juice:   { relatedWords: ['Apple Juice', 'Cold Juice', 'More Juice', 'Drink Juice', 'My Juice'] },
+  play:    { relatedWords: ['Ball', 'Bubbles', 'Swing', 'Outside', 'With Me'] },
+  eat:     { relatedWords: ['Apple', 'Snack', 'Lunch', 'More Food', 'Hungry'] },
+  drink:   { relatedWords: ['Water', 'Milk', 'Juice', 'More', 'Thirsty'] },
+  go:      { relatedWords: ['Outside', 'Home', 'Park', 'Car', 'School'] },
+  sleep:   { relatedWords: ['Bed', 'Tired', 'Pillow', 'Nap', 'Goodnight'] },
+  happy:   { relatedWords: ['Smile', 'Fun', 'Laugh', 'Play', 'Hug'] },
+  sad:     { relatedWords: ['Cry', 'Hug', 'Hurt', 'Miss You', 'Help Me'] },
+  big:     { relatedWords: ['Big Ball', 'Big Car', 'Big House', 'Bigger', 'Biggest'] },
+  small:   { relatedWords: ['Small Ball', 'Small Car', 'Tiny', 'Little', 'Smaller'] },
+  hot:     { relatedWords: ['Hot Food', 'Hot Water', 'Hot Tea', 'Too Hot', 'Warm'] },
+  cold:    { relatedWords: ['Cold Water', 'Cold Milk', 'Too Cold', 'Ice', 'Cool'] },
+  mom:     { relatedWords: ['Love Mom', 'Hug Mom', 'Mom Help', 'Where Mom', 'Mom Come'] },
+  dad:     { relatedWords: ['Love Dad', 'Hug Dad', 'Dad Help', 'Where Dad', 'Dad Come'] },
+  home:    { relatedWords: ['Go Home', 'My Home', 'At Home', 'Come Home', 'Stay Home'] },
+  help:    { relatedWords: ['Help Me', 'Help Please', 'Need Help', 'Help Mom', 'Help Now'] },
+  more:    { relatedWords: ['More Food', 'More Water', 'More Play', 'More Please', 'A Lot More'] },
+  pain:    { relatedWords: ['Hurt', 'Owie', 'Tummy Pain', 'Head Pain', 'Boo Boo'] },
+  washroom:{ relatedWords: ['Potty', 'Pee', 'Poop', 'Wash Hands', 'Need Toilet'] },
+  bubbles: { relatedWords: ['More Bubbles', 'Big Bubbles', 'Pop Bubbles', 'Blow Bubbles', 'Fun'] },
+};
+
+// Words that work well as descriptors prefix.
+const DESCRIPTORS = ['big', 'small', 'red', 'blue', 'hot', 'cold', 'soft', 'fast'];
+const ACTIONS = ['want', 'eat', 'play', 'see', 'have', 'give', 'make', 'open'];
+const NEEDS_ARTICLE = (w: string) => !['water','milk','juice','food','help','more','play','sleep','pain'].includes(w.toLowerCase());
+
+function titleCase(s: string): string {
+  return s.split(' ').map(w => w ? w[0].toUpperCase() + w.slice(1).toLowerCase() : w).join(' ');
+}
+
+function uniq(list: string[]): string[] {
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const x of list) {
+    const k = x.toLowerCase();
+    if (!seen.has(k)) { seen.add(k); out.push(x); }
+  }
+  return out;
+}
+
+function buildRelatedWords(word: string): string[] {
+  const w = word.toLowerCase();
+  const t = titleCase(w);
+  const out = [
+    `Big ${t}`,
+    `My ${t}`,
+    `More ${t}`,
+    `Want ${t}`,
+    `${t} Please`,
+  ];
+  return out;
+}
+
+function buildCurrent(word: string): string[] {
+  const t = titleCase(word);
+  return uniq([
+    `Want ${t}`,
+    `More ${t}`,
+    `My ${t}`,
+    `${t} Please`,
+  ]);
+}
+
+function buildExpanded(word: string): string[] {
+  const t = titleCase(word);
+  const lower = word.toLowerCase();
+  const article = NEEDS_ARTICLE(lower) ? (/^[aeiou]/i.test(lower) ? 'an ' : 'a ') : '';
+  return uniq([
+    `I want ${article}${lower}.`,
+    `Can I have ${article}${lower} please?`,
+    `I like ${article}${lower}.`,
+    `Give me ${article}${lower}.`,
+  ]);
+}
+
+function scaleForProfile(result: AssistantResult, profile: ChildProfile): AssistantResult {
+  if (profile.aacLevel <= 2) {
+    return {
+      ...result,
+      relatedWords: result.relatedWords.slice(0, 4),
+      currentLevel: result.currentLevel.slice(0, 3),
+      expandedLanguage: result.expandedLanguage.slice(0, 2),
+    };
+  }
+  return {
+    ...result,
+    relatedWords: result.relatedWords.slice(0, 6),
+    currentLevel: result.currentLevel.slice(0, 4),
+    expandedLanguage: result.expandedLanguage.slice(0, 4),
   };
 }
 
-// Curated developmental seed map (English). Words keyed by trigger word/category.
-const SEED: Record<string, AssistantResult> = {
-  play: {
-    currentLevel: {
-      words: ['ball', 'bubbles', 'swing', 'outside', 'with'],
-      phrases: ['play ball', 'more bubbles', 'go outside'],
-      sentences: ['I play.', 'You play.', 'Play more.'],
-    },
-    nextLevel: {
-      words: ['together', 'turn', 'fun', 'friend'],
-      phrases: ['my turn', 'your turn', 'play together'],
-      sentences: ["I want to play.", "Let's play outside.", 'Play with me.'],
-    },
-    targets: {
-      wordsToLearn: ['turn', 'together', 'friend'],
-      phrasesToModel: ['my turn please', 'play with friend'],
-      goals: ['Use 3-word combinations during play'],
-    },
-  },
-  eat: {
-    currentLevel: {
-      words: ['food', 'more', 'apple', 'water', 'hungry'],
-      phrases: ['more food', 'eat apple', 'want water'],
-      sentences: ['I eat.', 'Eat more.', 'I want food.'],
-    },
-    nextLevel: {
-      words: ['snack', 'lunch', 'tasty', 'finished'],
-      phrases: ['I am hungry', 'all finished', 'tasty snack'],
-      sentences: ['I want a snack.', 'I am all finished.', 'Can I have water please?'],
-    },
-    targets: {
-      wordsToLearn: ['hungry', 'finished', 'please'],
-      phrasesToModel: ['I am hungry', 'all done'],
-      goals: ['Request food using 3+ word phrase'],
-    },
-  },
-  drink: {
-    currentLevel: {
-      words: ['water', 'milk', 'juice', 'more', 'cup'],
-      phrases: ['more water', 'want milk', 'my cup'],
-      sentences: ['I drink.', 'Want juice.', 'Drink water.'],
-    },
-    nextLevel: {
-      words: ['thirsty', 'cold', 'warm', 'empty'],
-      phrases: ['I am thirsty', 'cup is empty', 'more please'],
-      sentences: ['I want some water.', 'My cup is empty.', 'Can I have milk please?'],
-    },
-    targets: {
-      wordsToLearn: ['thirsty', 'empty', 'please'],
-      phrasesToModel: ['cup empty', 'I thirsty'],
-      goals: ['Express need with feeling word'],
-    },
-  },
-  feelings: {
-    currentLevel: {
-      words: ['happy', 'sad', 'mad', 'tired', 'scared'],
-      phrases: ['I happy', 'I sad', 'feel tired'],
-      sentences: ['I feel happy.', 'I am sad.', 'I am tired.'],
-    },
-    nextLevel: {
-      words: ['because', 'frustrated', 'excited', 'calm'],
-      phrases: ['feel happy because', 'I am excited', 'help me calm'],
-      sentences: ['I feel sad because I miss you.', 'I am excited to play.', 'Please help me feel calm.'],
-    },
-    targets: {
-      wordsToLearn: ['because', 'frustrated', 'excited'],
-      phrasesToModel: ['I feel ___ because ___'],
-      goals: ['Name feeling + state cause'],
-    },
-  },
-  go: {
-    currentLevel: {
-      words: ['outside', 'home', 'park', 'car', 'school'],
-      phrases: ['go outside', 'go home', 'go park'],
-      sentences: ['I go.', 'Go now.', 'Go outside.'],
-    },
-    nextLevel: {
-      words: ['later', 'now', 'with', 'after'],
-      phrases: ['go to park', 'go with you', 'go after lunch'],
-      sentences: ['I want to go outside.', 'Can we go to the park?', "Let's go home now."],
-    },
-    targets: {
-      wordsToLearn: ['later', 'after', 'with'],
-      phrasesToModel: ['go with mommy', 'go later'],
-      goals: ['Use prepositions in 4-word phrase'],
-    },
-  },
-  default: {
-    currentLevel: {
-      words: ['want', 'more', 'help', 'stop', 'please'],
-      phrases: ['want more', 'help me', 'stop please'],
-      sentences: ['I want it.', 'Help me please.', 'I need more.'],
-    },
-    nextLevel: {
-      words: ['could', 'would', 'maybe', 'later'],
-      phrases: ['could I have', 'maybe later', 'help me please'],
-      sentences: ['Could I have some please?', 'I would like more.', 'Can you help me please?'],
-    },
-    targets: {
-      wordsToLearn: ['please', 'could', 'would'],
-      phrasesToModel: ['could I please', 'I would like'],
-      goals: ['Add politeness markers'],
-    },
-  },
-};
-
-function pickLevels(profile: ChildProfile, base: AssistantResult): AssistantResult {
-  // AAC level 1-2: trim to short words/phrases; 4-5: prefer full sentences.
-  if (profile.aacLevel <= 2) {
-    return {
-      currentLevel: {
-        words: base.currentLevel.words.slice(0, 4),
-        phrases: base.currentLevel.phrases.slice(0, 3),
-        sentences: base.currentLevel.sentences.slice(0, 2),
-      },
-      nextLevel: {
-        words: base.nextLevel.words.slice(0, 3),
-        phrases: base.nextLevel.phrases.slice(0, 2),
-        sentences: base.nextLevel.sentences.slice(0, 2),
-      },
-      targets: base.targets,
-    };
-  }
-  return base;
-}
-
-export function generateSuggestions(
-  trigger: string,
-  profile: ChildProfile,
-): AssistantResult {
+export function generateSuggestions(trigger: string, profile: ChildProfile): AssistantResult {
   const key = trigger.toLowerCase().trim();
-  const base = SEED[key] || SEED.default;
-  return pickLevels(profile, base);
+  if (!key) {
+    return { trigger, relatedWords: [], currentLevel: [], expandedLanguage: [] };
+  }
+  const override = OVERRIDES[key] || {};
+  const related = override.relatedWords ?? buildRelatedWords(key);
+  const current = override.currentLevel ?? buildCurrent(key);
+  const expanded = override.expandedLanguage ?? buildExpanded(key);
+
+  return scaleForProfile({
+    trigger,
+    relatedWords: uniq(related),
+    currentLevel: uniq(current),
+    expandedLanguage: uniq(expanded),
+  }, profile);
 }
 
-// Parent/therapist free-text need -> suggestions.
-// Simple keyword extraction in v1; ready for AI swap.
+// Parent/therapist free-text -> suggestions about the most meaningful noun.
 export function generateFromNeed(need: string, profile: ChildProfile): AssistantResult {
-  const lower = need.toLowerCase();
-  const keys = Object.keys(SEED).filter(k => k !== 'default' && lower.includes(k));
-  const trigger = keys[0] || 'default';
-  const base = generateSuggestions(trigger, profile);
-
-  // Lightly customise sentences with verbs found in `need`.
-  const customSentences: string[] = [];
-  const m = lower.match(/want[s]? to ([a-z ]+?)(?:\.|,|$| outside| inside| with)/);
-  if (m) {
-    const action = m[1].trim();
-    customSentences.push(`I want to ${action}.`);
-    customSentences.push(`Can we ${action} now?`);
-    customSentences.push(`Let's ${action} together.`);
-  }
-  if (customSentences.length) {
-    return {
-      ...base,
-      nextLevel: {
-        ...base.nextLevel,
-        sentences: [...customSentences, ...base.nextLevel.sentences].slice(0, 4),
-      },
-    };
-  }
-  return base;
+  const lower = need.toLowerCase().replace(/[.,!?]/g, '');
+  const words = lower.split(/\s+/).filter(Boolean);
+  const skip = new Set(['i','a','an','the','my','your','want','wants','to','for','with','some','please','can','could','would']);
+  const trigger = words.find(w => !skip.has(w) && w.length > 2) || words[0] || 'help';
+  return generateSuggestions(trigger, profile);
 }
