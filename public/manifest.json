@@ -1,12 +1,16 @@
 {
+  "id": "/",
   "name": "Spectra Speech – AAC Communication App",
   "short_name": "Spectra Speech",
   "description": "Child-friendly AAC communication app by Shabana Tariq - Speech Language Therapist",
+  "lang": "en",
   "start_url": "/",
   "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
   "background_color": "#ffffff",
   "theme_color": "#4A90D9",
   "orientation": "portrait-primary",
+  "categories": ["education", "health", "medical", "kids"],
   "icons": [
     {
       "src": "/icon-192x192.png",
@@ -31,6 +35,36 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshot-home.png",
+      "sizes": "640x1280",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Home Screen"
+    },
+    {
+      "src": "/screenshot-practice.png",
+      "sizes": "640x1280",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Practice Screen"
+    },
+    {
+      "src": "/screenshot-progress.png",
+      "sizes": "640x1280",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Progress Screen"
+    },
+    {
+      "src": "/screenshot-settings.png",
+      "sizes": "640x1280",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Settings Screen"
     }
   ]
 }
