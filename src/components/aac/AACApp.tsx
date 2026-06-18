@@ -193,10 +193,10 @@ export default function AACApp() {
         <header className="aac-gradient text-primary-foreground p-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3 flex-1 justify-center">
-              <img src={spectraLogo} alt="Spectra Speech" className="w-12 h-12 rounded-full bg-white/90 p-1 shadow-lg" />
+              <img src={spectraLogo} alt="Speechy AAC" className="w-12 h-12 rounded-full bg-white/90 p-1 shadow-lg" />
               <div className="text-center">
-                <h1 className="text-xl sm:text-2xl font-extrabold">Spectra Speech – AAC Communication App</h1>
-                <p className="text-xs opacity-90 mt-1">Developed by Shabana Tariq - Speech Language Therapist</p>
+                <h1 className="text-xl sm:text-2xl font-extrabold">Speechy AAC</h1>
+                <p className="text-xs opacity-90 mt-1">by SpectraSpeech — Shabana Tariq, Speech Language Therapist</p>
               </div>
             </div>
             {/* Edit Mode Toggle */}
