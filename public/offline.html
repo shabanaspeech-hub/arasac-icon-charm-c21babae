@@ -37,9 +37,25 @@
   <body>
     <div class="card">
       <div class="emoji">📡</div>
-      <h1>You're offline</h1>
-      <p>Speechy AAC needs a connection to load this page. Your saved boards and core words still work once the app is open.</p>
-      <button onclick="location.reload()">Try Again</button>
+      <h1>Refreshing Speechy AAC…</h1>
+      <p>Clearing an old cached version. This only takes a moment.</p>
+      <button onclick="cleanupAndReload()">Try Again</button>
     </div>
+    <script>
+      async function cleanupAndReload() {
+        try {
+          if ('serviceWorker' in navigator) {
+            const regs = await navigator.serviceWorker.getRegistrations();
+            await Promise.all(regs.map(function (r) { return r.unregister(); }));
+          }
+          if ('caches' in window) {
+            const names = await caches.keys();
+            await Promise.all(names.map(function (n) { return caches.delete(n); }));
+          }
+        } catch (e) {}
+        location.replace('/?__swcleaned=1');
+      }
+      cleanupAndReload();
+    </script>
   </body>
 </html>
