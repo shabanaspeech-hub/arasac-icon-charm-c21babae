@@ -34,45 +34,13 @@ async function unregisterAndCleanup(): Promise<boolean> {
 export function registerPWA() {
   if (typeof window === "undefined") return;
 
-  const host = window.location.hostname;
-  const inIframe = (() => {
-    try {
-      return window.self !== window.top;
-    } catch {
-      return true;
-    }
-  })();
   const url = new URL(window.location.href);
 
-  const refuse =
-    !import.meta.env.PROD ||
-    inIframe ||
-    host.startsWith("id-preview--") ||
-    host.startsWith("preview--") ||
-    host === "lovableproject.com" ||
-    host.endsWith(".lovableproject.com") ||
-    host === "lovableproject-dev.com" ||
-    host.endsWith(".lovableproject-dev.com") ||
-    host === "beta.lovable.dev" ||
-    host.endsWith(".beta.lovable.dev") ||
-    url.searchParams.get("sw") === "off";
-
-  if (refuse) {
-    void unregisterAndCleanup().then((didCleanup) => {
-      if (didCleanup && !url.searchParams.get("__swcleaned")) {
-        const reloadUrl = new URL(window.location.href);
-        reloadUrl.searchParams.set("__swcleaned", "1");
-        window.location.replace(reloadUrl.toString());
-      }
-    });
-    return;
-  }
-
-  if ("serviceWorker" in navigator) {
-    window.addEventListener("load", () => {
-      navigator.serviceWorker.register(SW_URL).catch(() => {
-        /* ignore */
-      });
-    });
-  }
+  void unregisterAndCleanup().then((didCleanup) => {
+    if (didCleanup && !url.searchParams.get("__swcleaned")) {
+      const reloadUrl = new URL(window.location.href);
+      reloadUrl.searchParams.set("__swcleaned", "1");
+      window.location.replace(reloadUrl.toString());
+    }
+  });
 }
