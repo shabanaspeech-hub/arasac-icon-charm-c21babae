@@ -5,29 +5,30 @@
 
 const SW_URL = "/sw.js";
 
-async function unregisterAndCleanup() {
-  if (!("serviceWorker" in navigator)) return;
+async function unregisterAndCleanup(): Promise<boolean> {
+  if (!("serviceWorker" in navigator)) return false;
+  let didCleanup = false;
   try {
     const regs = await navigator.serviceWorker.getRegistrations();
-    await Promise.all(
-      regs
-        .filter((r) => {
-          const url = r.active?.scriptURL || r.installing?.scriptURL || r.waiting?.scriptURL || "";
-          return url.endsWith(SW_URL) || url.includes("/sw.js");
-        })
-        .map((r) => r.unregister()),
-    );
+    const matching = regs.filter((r) => {
+      const url = r.active?.scriptURL || r.installing?.scriptURL || r.waiting?.scriptURL || "";
+      return url.endsWith(SW_URL) || url.includes("/sw.js");
+    });
+    if (matching.length > 0) didCleanup = true;
+    await Promise.all(matching.map((r) => r.unregister()));
     if ("caches" in window) {
       const names = await caches.keys();
-      await Promise.all(
-        names
-          .filter((n) => /precache|runtime|pages-cache|assets-cache|media-cache|workbox/i.test(n))
-          .map((n) => caches.delete(n)),
+      const toDelete = names.filter((n) =>
+        /precache|runtime|pages-cache|assets-cache|media-cache|workbox/i.test(n),
       );
+      if (toDelete.length > 0) didCleanup = true;
+      await Promise.all(toDelete.map((n) => caches.delete(n)));
     }
+    if (navigator.serviceWorker.controller) didCleanup = true;
   } catch {
     /* noop */
   }
+  return didCleanup;
 }
 
 export function registerPWA() {
