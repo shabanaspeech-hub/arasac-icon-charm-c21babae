@@ -58,7 +58,13 @@ export function registerPWA() {
     url.searchParams.get("sw") === "off";
 
   if (refuse) {
-    void unregisterAndCleanup();
+    void unregisterAndCleanup().then((didCleanup) => {
+      if (didCleanup && !url.searchParams.get("__swcleaned")) {
+        const reloadUrl = new URL(window.location.href);
+        reloadUrl.searchParams.set("__swcleaned", "1");
+        window.location.replace(reloadUrl.toString());
+      }
+    });
     return;
   }
 
