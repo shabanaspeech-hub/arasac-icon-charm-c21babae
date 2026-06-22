@@ -70,7 +70,7 @@ export default function InstallBanner() {
               Tap <Share size={14} className="inline" /> then "Add to Home Screen"
             </p>
           ) : (
-            <p className="text-xs opacity-90">Install for faster access & offline use</p>
+            <p className="text-xs opacity-90">Install for faster access</p>
           )}
         </div>
         {!isIOS && (
