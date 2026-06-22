@@ -18,10 +18,8 @@ export default defineConfig(({ mode }) => ({
     mode === "development" && componentTagger(),
     VitePWA({
       registerType: "autoUpdate",
-      injectRegister: "auto",
-      devOptions: {
-        enabled: false,
-      },
+      injectRegister: null, // We register manually from src/pwa.ts (guarded)
+      devOptions: { enabled: false },
       includeAssets: [
         "favicon.png",
         "offline.html",
@@ -64,7 +62,7 @@ export default defineConfig(({ mode }) => ({
           },
         ],
       },
-      manifest: false, // We use our own public/manifest.json
+      manifest: false,
     }),
   ].filter(Boolean),
   resolve: {
