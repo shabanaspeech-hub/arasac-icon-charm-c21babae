@@ -232,23 +232,6 @@ export default function AACApp() {
         {/* Core Words - Always Visible */}
         <CoreWordsBar language={language} onSelect={addToSentence} />
 
-        {/* Quick Phrases */}
-        <div className="bg-warning/15 p-3 border-b-[3px] border-warning overflow-x-auto">
-          <h3 className="text-xs font-bold text-warning-foreground mb-2">
-            ⚡ {language === 'english' ? 'Quick Phrases' : 'त्वरित वाक्यांश'}
-          </h3>
-          <div className="flex gap-2 flex-wrap">
-            {phrases.map((phrase, i) => (
-              <button
-                key={i}
-                onClick={() => addPhrase(phrase)}
-                className="px-3 py-1.5 bg-warning text-warning-foreground rounded-lg font-bold text-xs hover:brightness-95 transition-all hover:scale-105"
-              >
-                {phrase}
-              </button>
-            ))}
-          </div>
-        </div>
 
         {/* Sentence Bar */}
         <SentenceBar sentence={sentence} language={language} onRemoveWord={removeWord} />
