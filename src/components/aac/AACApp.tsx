@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, type ReactNode } from 'react';
 import { Volume2, Delete, Trash2, Mic, Search, Settings, Plus, FolderOpen, Lock, Unlock, Star, ChevronUp, ChevronDown, X, LayoutGrid, Sparkles, Menu, Home } from 'lucide-react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import spectraLogo from '@/assets/spectra-logo.png';
@@ -207,7 +207,7 @@ export default function AACApp() {
     : isCustomView ? (() => { const c = customCategories.find(c => c.id === activeCustomCategory); return c ? (language === 'english' ? c.nameEn : c.nameHi) : ''; })()
     : splitLabel(language === 'english' ? categories[currentCategory]?.en ?? '' : categories[currentCategory]?.hi ?? '').name;
 
-  const DockItem = ({ active, icon, label, onClick }: { active: boolean; icon: React.ReactNode; label: string; onClick: () => void }) => (
+  const DockItem = ({ active, icon, label, onClick }: { active: boolean; icon: ReactNode; label: string; onClick: () => void }) => (
     <button
       onClick={onClick}
       aria-current={active ? 'page' : undefined}
@@ -429,7 +429,7 @@ export default function AACApp() {
                 <input
                   type="text"
                   value={searchQuery}
-                  onChange={e => setSearchQuery(e.target.value)}
+                  onChange={e => { setSearchQuery(e.target.value); setShowBeginner(false); setShowFavorites(false); setActiveCustomCategory(null); if (currentCategory === 'keyboard') setCurrentCategory('core'); }}
                   placeholder={language === 'english' ? 'Search words…' : 'शब्द खोजें…'}
                   className="w-full pl-9 pr-3 py-2.5 border border-border rounded-lg bg-card focus:border-primary focus:outline-none"
                 />
