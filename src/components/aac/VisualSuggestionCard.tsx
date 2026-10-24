@@ -55,7 +55,7 @@ export function VisualSuggestionCard({ text, size = 'md', onTap, onAdd, onFav }:
     <div className="relative">
       <button
         onClick={onTap}
-        className={`group w-full ${heights[size]} flex flex-col items-center justify-center p-2 rounded-xl border-[3px] border-primary/40 bg-card hover:border-primary hover:-translate-y-0.5 hover:shadow-lg active:scale-95 transition-all`}
+        className={`group w-full ${heights[size]} flex flex-col items-center justify-center p-2 rounded-xl border-[3px] aac-card-core hover:border-primary hover:-translate-y-0.5 hover:shadow-lg active:scale-95 transition-all`}
       >
         <Volume2 size={12} className="absolute top-1.5 left-1.5 text-primary opacity-60" />
         <div className="flex-1 w-full flex items-center justify-center min-h-0 mb-1">

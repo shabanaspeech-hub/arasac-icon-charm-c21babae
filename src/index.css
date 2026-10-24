@@ -84,43 +84,43 @@
 
   .aac-card-core {
     border-color: hsl(var(--aac-core));
-    background: hsl(var(--aac-core) / 0.12);
+    background: hsl(var(--aac-core) / 0.35);
   }
   .aac-card-noun {
     border-color: hsl(var(--aac-noun));
-    background: hsl(var(--aac-noun) / 0.12);
+    background: hsl(var(--aac-noun) / 0.35);
   }
   .aac-card-verb {
     border-color: hsl(var(--aac-verb));
-    background: hsl(var(--aac-verb) / 0.12);
+    background: hsl(var(--aac-verb) / 0.35);
   }
   .aac-card-descriptor {
     border-color: hsl(var(--aac-descriptor));
-    background: hsl(var(--aac-descriptor) / 0.12);
+    background: hsl(var(--aac-descriptor) / 0.35);
   }
   .aac-card-preposition {
     border-color: hsl(var(--aac-preposition));
-    background: hsl(var(--aac-preposition) / 0.12);
+    background: hsl(var(--aac-preposition) / 0.35);
   }
   .aac-card-question {
     border-color: hsl(var(--aac-question));
-    background: hsl(var(--aac-question) / 0.12);
+    background: hsl(var(--aac-question) / 0.35);
   }
   .aac-card-negation {
     border-color: hsl(var(--aac-negation));
-    background: hsl(var(--aac-negation) / 0.12);
+    background: hsl(var(--aac-negation) / 0.35);
   }
   .aac-card-feeling {
     border-color: hsl(var(--aac-feeling));
-    background: hsl(var(--aac-feeling) / 0.12);
+    background: hsl(var(--aac-feeling) / 0.35);
   }
   .aac-card-social {
     border-color: hsl(var(--aac-social));
-    background: hsl(var(--aac-social) / 0.12);
+    background: hsl(var(--aac-social) / 0.35);
   }
   .aac-card-misc {
     border-color: hsl(var(--aac-misc));
-    background: hsl(var(--aac-misc) / 0.15);
+    background: hsl(var(--aac-misc) / 0.35);
   }
 
   .safe-area-bottom {
