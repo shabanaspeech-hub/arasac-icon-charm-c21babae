@@ -401,12 +401,6 @@ export default function AACApp() {
         )}
 
           </div>
-          <SuggestionBar
-            lastWord={sentence.length > 0 ? sentence[sentence.length - 1] : null}
-            language={language}
-            onSelect={addToSentence}
-          />
-          <CoreWordsBar language={language} onSelect={addToSentence} />
         </main>
       </div>
 
