@@ -1,5 +1,6 @@
-import { useState, useCallback, useMemo } from 'react';
-import { Volume2, Delete, Trash2, Mic, Search, Settings, Plus, FolderOpen, Lock, Unlock, Star, ChevronUp, ChevronDown, X, LayoutGrid, Sparkles } from 'lucide-react';
+import { useState, useCallback, useMemo, type ReactNode } from 'react';
+import { Volume2, Delete, Trash2, Mic, Search, Settings, Plus, FolderOpen, Lock, Unlock, Star, ChevronUp, ChevronDown, X, LayoutGrid, Sparkles, Menu, Home } from 'lucide-react';
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import spectraLogo from '@/assets/spectra-logo.png';
 import { symbols, categories, quickPhrases, type AACSymbol, type CategoryKey } from '@/data/aacData';
 import { useSpeech } from '@/hooks/useSpeech';
@@ -42,6 +43,8 @@ export default function AACApp() {
   const [showFavorites, setShowFavorites] = useState(false);
   const [showBeginner, setShowBeginner] = useState(true);
   const [assistantTrigger, setAssistantTrigger] = useState<string>('');
+  const [folderSheetOpen, setFolderSheetOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   const { gridSize, setGridSize, gridColClass } = useGridSize();
   const { favorites, isFavorite, toggleFavorite, removeFavorite, moveFavorite } = useFavorites();
@@ -186,206 +189,117 @@ export default function AACApp() {
     }
   });
 
+  const goFolder = (fn: () => void) => { fn(); setSearchQuery(''); setFolderSheetOpen(false); };
+  const openBeginner = () => goFolder(() => { setShowBeginner(true); setShowFavorites(false); setActiveCustomCategory(null); });
+  const openFavorites = () => goFolder(() => { setShowFavorites(true); setShowBeginner(false); setActiveCustomCategory(null); });
+  const openCategory = (key: string) => goFolder(() => { setCurrentCategory(key); setActiveCustomCategory(null); setShowFavorites(false); setShowBeginner(false); });
+  const openCustom = (id: string) => goFolder(() => { setActiveCustomCategory(id); setShowFavorites(false); setShowBeginner(false); });
+
+  const splitLabel = (label: string) => {
+    const i = label.indexOf(' ');
+    return i > 0 ? { icon: label.slice(0, i), name: label.slice(i + 1) } : { icon: '📁', name: label };
+  };
+
+  const currentTitle = searchQuery.trim()
+    ? (language === 'english' ? `Search: “${searchQuery}”` : `खोज: “${searchQuery}”`)
+    : showBeginner ? (language === 'english' ? 'Beginner' : 'शुरुआती')
+    : showFavorites ? (language === 'english' ? 'Favorites' : 'पसंदीदा')
+    : isCustomView ? (() => { const c = customCategories.find(c => c.id === activeCustomCategory); return c ? (language === 'english' ? c.nameEn : c.nameHi) : ''; })()
+    : splitLabel(language === 'english' ? categories[currentCategory]?.en ?? '' : categories[currentCategory]?.hi ?? '').name;
+
+  const DockItem = ({ active, icon, label, onClick }: { active: boolean; icon: ReactNode; label: string; onClick: () => void }) => (
+    <button
+      onClick={onClick}
+      aria-current={active ? 'page' : undefined}
+      className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left text-sm font-bold transition-colors border ${
+        active ? 'bg-primary text-primary-foreground border-primary shadow-sm' : 'bg-card text-foreground border-transparent hover:bg-secondary hover:border-border'
+      }`}
+    >
+      <span className="text-xl w-7 text-center shrink-0" aria-hidden>{icon}</span>
+      <span className="truncate">{label}</span>
+    </button>
+  );
+
+  const folderList = (
+    <nav className="flex flex-col gap-1.5" aria-label="Folders">
+      <DockItem active={showBeginner && !searchQuery} icon="🌟" label={language === 'english' ? 'Beginner' : 'शुरुआती'} onClick={openBeginner} />
+      <DockItem active={showFavorites && !searchQuery} icon={<Star size={18} className="mx-auto" />} label={`${language === 'english' ? 'Favorites' : 'पसंदीदा'} (${favorites.length})`} onClick={openFavorites} />
+      <div className="h-px bg-border my-1.5" />
+      {Object.entries(categories).map(([key, val]) => {
+        const { icon, name } = splitLabel(language === 'english' ? val.en : val.hi);
+        const active = key === currentCategory && !isCustomView && !showFavorites && !showBeginner && !searchQuery;
+        return <DockItem key={key} active={active} icon={icon} label={name} onClick={() => openCategory(key)} />;
+      })}
+      {(customCategories.length > 0 || editMode) && <div className="h-px bg-border my-1.5" />}
+      {customCategories.map(cat => (
+        <DockItem key={cat.id} active={activeCustomCategory === cat.id && !showFavorites && !showBeginner} icon="📷" label={language === 'english' ? cat.nameEn : cat.nameHi} onClick={() => openCustom(cat.id)} />
+      ))}
+      {editMode && (
+        <button onClick={() => setCategoryManagerOpen(true)} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold text-primary border border-dashed border-primary/40 hover:bg-primary/5">
+          <FolderOpen size={18} className="w-7" /> {language === 'english' ? 'Manage folders' : 'फ़ोल्डर प्रबंधित करें'}
+        </button>
+      )}
+    </nav>
+  );
+
   return (
-    <div className="min-h-screen bg-background p-2 sm:p-4">
-      <div className="max-w-6xl mx-auto bg-card rounded-2xl shadow-2xl overflow-hidden">
-        {/* Header */}
-        <header className="aac-gradient text-primary-foreground p-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3 flex-1 justify-center">
-              <img src={spectraLogo} alt="Speechy AAC" className="w-12 h-12 rounded-full bg-white/90 p-1 shadow-lg" />
-              <div className="text-center">
-                <h1 className="text-xl sm:text-2xl font-extrabold">Speechy AAC</h1>
-                <p className="text-xs opacity-90 mt-1">by SpectraSpeech — Shabana Tariq, Speech Language Therapist</p>
-              </div>
-            </div>
-            {/* Edit Mode Toggle */}
-            <button
-              onClick={() => setEditMode(!editMode)}
-              className={`flex items-center gap-1.5 px-3 py-2 rounded-lg font-bold text-xs transition-all shrink-0 ml-2 ${editMode ? 'bg-warning text-warning-foreground' : 'bg-primary-foreground/20 text-primary-foreground'}`}
-            >
-              {editMode ? <Unlock size={14} /> : <Lock size={14} />}
-              {editMode ? 'Edit ON' : 'Locked'}
-            </button>
-          </div>
-          <div className="bg-primary-foreground/20 p-2 mt-3 rounded-lg text-xs font-semibold text-center">
-            📚 Total Words: {totalWords} | ⭐ Core Words: {coreWords} | 📁 Categories: {Object.keys(categories).length - 1}
-          </div>
-        </header>
+    <div className="h-[100dvh] flex flex-col bg-background text-foreground overflow-hidden">
+      {/* Top bar */}
+      <header className="flex items-center gap-2 px-3 py-2 bg-card border-b border-border shrink-0">
+        <button onClick={() => setFolderSheetOpen(true)} className="lg:hidden p-2 rounded-lg hover:bg-secondary" aria-label="Open folders">
+          <Menu size={22} />
+        </button>
+        <img src={spectraLogo} alt="" className="w-8 h-8 rounded-full" />
+        <span className="font-extrabold text-base hidden sm:inline">Speechy AAC</span>
+        <div className="flex-1" />
+        {editMode && <span className="text-xs font-bold px-2 py-1 rounded-md bg-warning text-warning-foreground">{language === 'english' ? 'Edit mode' : 'एडिट मोड'}</span>}
+        <button onClick={() => setSettingsOpen(true)} className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-border text-sm font-bold hover:bg-secondary" aria-label="Settings">
+          <Settings size={18} /> <span className="hidden sm:inline">{language === 'english' ? 'Settings' : 'सेटिंग्स'}</span>
+        </button>
+      </header>
 
-        {/* Language Toggle */}
-        <div className="flex justify-center gap-3 p-3 bg-secondary border-b-2 border-border">
-          <button
-            onClick={() => setLanguage('english')}
-            className={`px-6 py-2 rounded-full font-bold text-sm transition-all ${language === 'english' ? 'aac-gradient text-primary-foreground scale-105 shadow-md' : 'bg-card text-primary shadow-sm'}`}
-          >
-            English
+      {/* Message window */}
+      <div className="flex items-stretch gap-2 p-2 bg-secondary/60 border-b border-border shrink-0">
+        <div className="flex-1 min-w-0 rounded-xl bg-card border border-border overflow-hidden">
+          <SentenceBar sentence={sentence} language={language} onRemoveWord={removeWord} />
+        </div>
+        <div className="flex gap-1.5">
+          <button onClick={speakSentence} className="flex flex-col items-center justify-center gap-0.5 w-16 sm:w-20 rounded-xl bg-success text-success-foreground font-bold text-xs active:scale-95 transition" aria-label="Speak">
+            <Volume2 size={24} /> {language === 'english' ? 'Speak' : 'बोलो'}
           </button>
-          <button
-            onClick={() => setLanguage('hindi')}
-            className={`px-6 py-2 rounded-full font-bold text-sm transition-all ${language === 'hindi' ? 'aac-gradient text-primary-foreground scale-105 shadow-md' : 'bg-card text-primary shadow-sm'}`}
-          >
-            हिंदी (Hindi)
+          <button onClick={() => setSentence(prev => prev.slice(0, -1))} className="flex flex-col items-center justify-center gap-0.5 w-14 sm:w-16 rounded-xl bg-card border border-border font-bold text-xs active:scale-95 transition" aria-label="Delete last word">
+            <Delete size={20} /> {language === 'english' ? 'Back' : 'हटाओ'}
+          </button>
+          <button onClick={() => setSentence([])} className="flex flex-col items-center justify-center gap-0.5 w-14 sm:w-16 rounded-xl bg-card border border-border font-bold text-xs active:scale-95 transition" aria-label="Clear sentence">
+            <Trash2 size={20} /> {language === 'english' ? 'Clear' : 'साफ़'}
           </button>
         </div>
+      </div>
 
-        {/* Core Words - Always Visible */}
-        <CoreWordsBar language={language} onSelect={addToSentence} />
+      <InlineAssistantStrip
+        trigger={assistantTrigger}
+        language={language}
+        onSpeak={(t) => speak(t, language)}
+        onAddToBoard={(t) => addPhrase(t)}
+      />
 
+      <div className="flex-1 flex min-h-0">
+        {/* Side folder dock */}
+        <aside className="hidden lg:block w-56 shrink-0 border-r border-border bg-card overflow-y-auto p-2">
+          {folderList}
+        </aside>
 
-        {/* Sentence Bar */}
-        <SentenceBar sentence={sentence} language={language} onRemoveWord={removeWord} />
-
-        {/* Inline Communication Expansion (Assistant ON only, no popups) */}
-        <InlineAssistantStrip
-          trigger={assistantTrigger}
-          language={language}
-          onSpeak={(t) => speak(t, language)}
-          onAddToBoard={(t) => addPhrase(t)}
-        />
-
-        {/* Smart Suggestions */}
-        <SuggestionBar
-          lastWord={sentence.length > 0 ? sentence[sentence.length - 1] : null}
-          language={language}
-          onSelect={addToSentence}
-        />
-
-        {/* Controls */}
-        <div className="flex justify-center gap-2 p-3 bg-secondary flex-wrap">
-          <button onClick={speakSentence} className="flex items-center gap-1.5 px-4 py-2 bg-success text-success-foreground rounded-lg font-bold text-sm hover:brightness-95 transition-all">
-            <Volume2 size={16} /> Speak
-          </button>
-          <button onClick={() => setSentence(prev => prev.slice(0, -1))} className="flex items-center gap-1.5 px-4 py-2 bg-warning text-warning-foreground rounded-lg font-bold text-sm hover:brightness-95 transition-all">
-            <Delete size={16} /> Delete
-          </button>
-          <button onClick={() => setSentence([])} className="flex items-center gap-1.5 px-4 py-2 bg-destructive text-destructive-foreground rounded-lg font-bold text-sm hover:brightness-95 transition-all">
-            <Trash2 size={16} /> Clear
-          </button>
-          <button onClick={() => setVoiceModalOpen(true)} className="flex items-center gap-1.5 px-4 py-2 bg-info text-info-foreground rounded-lg font-bold text-sm hover:brightness-95 transition-all">
-            <Mic size={16} /> Voice
-          </button>
-          <button
-            onClick={toggleAssistant}
-            title={language === 'english' ? 'Toggle Communication Assistant' : 'सहायक चालू/बंद करें'}
-            className={`flex items-center gap-1.5 px-4 py-2 rounded-lg font-bold text-sm transition-all shadow-sm ${
-              childProfile.assistantEnabled
-                ? 'bg-gradient-to-r from-primary to-accent text-primary-foreground'
-                : 'bg-card border border-border text-muted-foreground'
-            }`}
-          >
-            <Sparkles size={16} />
-            {language === 'english'
-              ? `Assistant ${childProfile.assistantEnabled ? 'ON' : 'OFF'}`
-              : `सहायक ${childProfile.assistantEnabled ? 'चालू' : 'बंद'}`}
-          </button>
-        </div>
-
-        {/* Search */}
-        <div className="p-3 bg-secondary border-b-2 border-border">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
-              placeholder={language === 'english' ? '🔍 Search words...' : '🔍 शब्द खोजें...'}
-              className="w-full pl-10 pr-4 py-2.5 border-2 border-border rounded-lg text-sm bg-card text-foreground focus:border-primary focus:outline-none"
-            />
-          </div>
-        </div>
-
-        {/* Color Legend */}
-        <div className="p-2 px-4 bg-secondary border-b-2 border-border text-xs flex flex-wrap gap-3">
-          <strong>Color Code:</strong>
-          {Object.entries(wordColors).map(([type, icon]) => (
-            <span key={type}>{icon} {type.charAt(0).toUpperCase() + type.slice(1)}</span>
-          ))}
-        </div>
-
-        {/* Built-in Categories */}
-        <div className="flex overflow-x-auto gap-2 p-3 bg-secondary border-b-2 border-border items-center">
-          <button
-            onClick={() => { setShowBeginner(true); setShowFavorites(false); setActiveCustomCategory(null); setSearchQuery(''); }}
-            className={`px-4 py-2 rounded-lg font-bold text-xs whitespace-nowrap transition-all flex items-center gap-1 ${showBeginner ? 'bg-primary text-primary-foreground shadow-md' : 'bg-primary/20 text-primary'}`}
-          >
-            🌟 {language === 'english' ? 'Beginner' : 'शुरुआती'}
-          </button>
-
-          <button
-            onClick={() => { setShowFavorites(true); setShowBeginner(false); setActiveCustomCategory(null); setSearchQuery(''); }}
-            className={`px-4 py-2 rounded-lg font-bold text-xs whitespace-nowrap transition-all flex items-center gap-1 ${showFavorites ? 'bg-warning text-warning-foreground shadow-md' : 'bg-warning/30 text-warning-foreground'}`}
-          >
-            <Star size={14} className={showFavorites ? 'fill-current' : ''} />
-            {language === 'english' ? `Favorites (${favorites.length})` : `पसंदीदा (${favorites.length})`}
-          </button>
-
-          {Object.entries(categories).map(([key, val]) => {
-            const label = language === 'english' ? val.en : val.hi;
-            const isActive = key === currentCategory && !isCustomView && !showFavorites && !showBeginner;
-            let btnClass = 'bg-card text-foreground shadow-sm';
-            if (key === 'core') btnClass = isActive ? 'bg-success/80 text-success-foreground' : 'bg-success text-success-foreground';
-            else if (key === 'keyboard') btnClass = isActive ? 'bg-info/80 text-info-foreground' : 'bg-info text-info-foreground';
-            else if (isActive) btnClass = 'aac-gradient text-primary-foreground';
-
-            return (
-              <button
-                key={key}
-                onClick={() => { setCurrentCategory(key); setSearchQuery(''); setActiveCustomCategory(null); setShowFavorites(false); setShowBeginner(false); }}
-                className={`px-4 py-2 rounded-lg font-bold text-xs whitespace-nowrap transition-all ${btnClass}`}
-              >
-
-                {label}
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Custom Categories */}
-        {customCategories.length > 0 && (
-          <div className="flex overflow-x-auto gap-2 p-3 bg-accent/10 border-b-2 border-border items-center">
-            <span className="text-xs font-bold text-muted-foreground whitespace-nowrap">📷 My Items:</span>
-            {customCategories.map(cat => {
-              const isActive = activeCustomCategory === cat.id;
-              return (
-                <button
-                  key={cat.id}
-                  onClick={() => { setActiveCustomCategory(cat.id); setSearchQuery(''); setShowFavorites(false); setShowBeginner(false); }}
-                  className={`px-4 py-2 rounded-lg font-bold text-xs whitespace-nowrap transition-all ${isActive ? 'aac-gradient text-primary-foreground' : 'bg-card text-foreground shadow-sm border border-border'}`}
-                >
-                  {language === 'english' ? cat.nameEn : cat.nameHi}
-                </button>
-              );
-            })}
-            {editMode && (
-              <button
-                onClick={() => setCategoryManagerOpen(true)}
-                className="px-3 py-2 bg-primary/10 text-primary rounded-lg font-bold text-xs border border-primary/30 hover:bg-primary/20 whitespace-nowrap"
-              >
-                <Settings size={12} className="inline mr-1" /> Manage
+        {/* Board */}
+        <main className="flex-1 min-w-0 flex flex-col">
+          <div className="flex items-center gap-2 px-3 py-1.5 border-b border-border bg-card shrink-0">
+            {!showBeginner && (
+              <button onClick={openBeginner} className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-border text-xs font-bold hover:bg-secondary" aria-label="Home">
+                <Home size={14} /> {language === 'english' ? 'Home' : 'होम'}
               </button>
             )}
+            <h2 className="text-sm font-extrabold truncate">{currentTitle}</h2>
           </div>
-        )}
-
-        {/* Grid Size Selector (Edit Mode only) */}
-        {editMode && (
-          <div className="flex items-center gap-2 p-3 bg-accent/5 border-b-2 border-border flex-wrap">
-            <span className="text-xs font-bold text-muted-foreground flex items-center gap-1">
-              <LayoutGrid size={12} /> {language === 'english' ? 'Grid Layout:' : 'ग्रिड लेआउट:'}
-            </span>
-            {GRID_OPTIONS.map(size => (
-              <button
-                key={size}
-                onClick={() => setGridSize(size)}
-                className={`px-3 py-1.5 rounded-lg font-bold text-xs transition-all ${gridSize === size ? 'aac-gradient text-primary-foreground shadow-md' : 'bg-card text-foreground border border-border hover:bg-secondary'}`}
-              >
-                {size}
-              </button>
-            ))}
-          </div>
-        )}
-
+          <div className="flex-1 min-h-0 overflow-y-auto p-2">
         {/* Content */}
         {showBeginner ? (
           <BeginnerBoard language={language} onSelect={handleBeginnerTap} />
@@ -486,9 +400,90 @@ export default function AACApp() {
           />
         )}
 
+          </div>
+          <SuggestionBar
+            lastWord={sentence.length > 0 ? sentence[sentence.length - 1] : null}
+            language={language}
+            onSelect={addToSentence}
+          />
+          <CoreWordsBar language={language} onSelect={addToSentence} />
+        </main>
       </div>
 
+      {/* Folders drawer (mobile / tablet portrait) */}
+      <Sheet open={folderSheetOpen} onOpenChange={setFolderSheetOpen}>
+        <SheetContent side="left" className="w-72 p-3 overflow-y-auto">
+          <SheetHeader className="mb-3"><SheetTitle>{language === 'english' ? 'Folders' : 'फ़ोल्डर'}</SheetTitle></SheetHeader>
+          {folderList}
+        </SheetContent>
+      </Sheet>
+
+      {/* Settings drawer */}
+      <Sheet open={settingsOpen} onOpenChange={setSettingsOpen}>
+        <SheetContent side="right" className="w-80 overflow-y-auto">
+          <SheetHeader className="mb-4"><SheetTitle>{language === 'english' ? 'Settings' : 'सेटिंग्स'}</SheetTitle></SheetHeader>
+          <div className="space-y-5 text-sm">
+            <section className="space-y-2">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={16} />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={e => { setSearchQuery(e.target.value); setShowBeginner(false); setShowFavorites(false); setActiveCustomCategory(null); if (currentCategory === 'keyboard') setCurrentCategory('core'); }}
+                  placeholder={language === 'english' ? 'Search words…' : 'शब्द खोजें…'}
+                  className="w-full pl-9 pr-3 py-2.5 border border-border rounded-lg bg-card focus:border-primary focus:outline-none"
+                />
+              </div>
+            </section>
+            <section className="space-y-2">
+              <h3 className="text-xs font-bold uppercase text-muted-foreground">{language === 'english' ? 'Language' : 'भाषा'}</h3>
+              <div className="grid grid-cols-2 gap-2">
+                {(['english', 'hindi'] as const).map(l => (
+                  <button key={l} onClick={() => setLanguage(l)} className={`py-2 rounded-lg font-bold border ${language === l ? 'bg-primary text-primary-foreground border-primary' : 'bg-card border-border'}`}>
+                    {l === 'english' ? 'English' : 'हिंदी'}
+                  </button>
+                ))}
+              </div>
+            </section>
+            <section className="space-y-2">
+              <h3 className="text-xs font-bold uppercase text-muted-foreground flex items-center gap-1"><LayoutGrid size={12} /> {language === 'english' ? 'Pictures per page' : 'प्रति पेज चित्र'}</h3>
+              <div className="grid grid-cols-6 gap-1.5">
+                {GRID_OPTIONS.map(size => (
+                  <button key={size} onClick={() => setGridSize(size)} className={`py-2 rounded-lg font-bold border ${gridSize === size ? 'bg-primary text-primary-foreground border-primary' : 'bg-card border-border'}`}>{size}</button>
+                ))}
+              </div>
+            </section>
+            <section className="space-y-2">
+              <button onClick={() => setEditMode(!editMode)} className={`w-full flex items-center gap-2 px-3 py-2.5 rounded-lg font-bold border ${editMode ? 'bg-warning text-warning-foreground border-warning' : 'bg-card border-border'}`}>
+                {editMode ? <Unlock size={16} /> : <Lock size={16} />} {editMode ? (language === 'english' ? 'Edit mode ON' : 'एडिट मोड चालू') : (language === 'english' ? 'Child mode (locked)' : 'चाइल्ड मोड (लॉक)')}
+              </button>
+              <button onClick={toggleAssistant} className={`w-full flex items-center gap-2 px-3 py-2.5 rounded-lg font-bold border ${childProfile.assistantEnabled ? 'bg-primary text-primary-foreground border-primary' : 'bg-card border-border'}`}>
+                <Sparkles size={16} /> {language === 'english' ? `Assistant ${childProfile.assistantEnabled ? 'ON' : 'OFF'}` : `सहायक ${childProfile.assistantEnabled ? 'चालू' : 'बंद'}`}
+              </button>
+              <button onClick={() => { setSettingsOpen(false); setVoiceModalOpen(true); }} className="w-full flex items-center gap-2 px-3 py-2.5 rounded-lg font-bold border border-border bg-card">
+                <Mic size={16} /> {language === 'english' ? 'Voice settings' : 'आवाज़ सेटिंग्स'}
+              </button>
+              {editMode && (
+                <button onClick={() => { setSettingsOpen(false); setCategoryManagerOpen(true); }} className="w-full flex items-center gap-2 px-3 py-2.5 rounded-lg font-bold border border-border bg-card">
+                  <FolderOpen size={16} /> {language === 'english' ? 'Manage folders' : 'फ़ोल्डर प्रबंधित करें'}
+                </button>
+              )}
+            </section>
+            <section className="space-y-2">
+              <h3 className="text-xs font-bold uppercase text-muted-foreground">{language === 'english' ? 'Colour code' : 'रंग कोड'}</h3>
+              <div className="grid grid-cols-2 gap-1 text-xs">
+                {Object.entries(wordColors).map(([type, icon]) => (
+                  <span key={type}>{icon} {type.charAt(0).toUpperCase() + type.slice(1)}</span>
+                ))}
+              </div>
+              <p className="text-xs text-muted-foreground pt-2">📚 {totalWords} words · ⭐ {coreWords} core · by SpectraSpeech — Shabana Tariq, SLP</p>
+            </section>
+          </div>
+        </SheetContent>
+      </Sheet>
+
       {/* Dialogs */}
+
       <VoiceSettingsDialog
         open={voiceModalOpen}
         onClose={() => setVoiceModalOpen(false)}
