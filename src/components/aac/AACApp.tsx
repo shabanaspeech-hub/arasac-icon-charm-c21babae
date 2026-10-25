@@ -281,6 +281,7 @@ export default function AACApp() {
         language={language}
         onSpeak={(t) => speak(t, language)}
         onAddToBoard={(t) => addPhrase(t)}
+        onClose={() => setAssistantTrigger('')}
       />
 
       <div className="flex-1 flex min-h-0">
