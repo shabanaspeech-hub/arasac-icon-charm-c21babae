@@ -250,8 +250,22 @@ export default function AACApp() {
           <Menu size={22} />
         </button>
         <img src={spectraLogo} alt="" className="w-8 h-8 rounded-full" />
-        <span className="font-extrabold text-base hidden sm:inline">Speechy AAC</span>
-        <div className="flex-1" />
+        <div className="hidden md:flex flex-col leading-tight">
+          <span className="font-extrabold text-base tracking-wide">VOXAFIA</span>
+          <span className="text-[10px] text-muted-foreground">Every Voice Deserves to Be Heard</span>
+        </div>
+        <div className="flex-1 flex justify-center">
+          <div className="inline-flex rounded-xl border border-border bg-secondary p-1" role="tablist" aria-label="Board mode">
+            {(() => {
+              const typing = currentCategory === 'keyboard' && !showBeginner && !showFavorites && !activeCustomCategory;
+              const cls = (on: boolean) => `px-3 py-1.5 rounded-lg text-sm font-bold transition ${on ? 'bg-card shadow text-foreground' : 'text-muted-foreground'}`;
+              return (<>
+                <button role="tab" aria-selected={!typing} onClick={openBeginner} className={cls(!typing)}>🖼️ {language === 'english' ? 'Pictures' : 'चित्र'}</button>
+                <button role="tab" aria-selected={typing} onClick={() => openCategory('keyboard')} className={cls(typing)}>⌨️ {language === 'english' ? 'Type' : 'टाइप'}</button>
+              </>);
+            })()}
+          </div>
+        </div>
         {editMode && <span className="text-xs font-bold px-2 py-1 rounded-md bg-warning text-warning-foreground">{language === 'english' ? 'Edit mode' : 'एडिट मोड'}</span>}
         <button onClick={() => setSettingsOpen(true)} className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-border text-sm font-bold hover:bg-secondary" aria-label="Settings">
           <Settings size={18} /> <span className="hidden sm:inline">{language === 'english' ? 'Settings' : 'सेटिंग्स'}</span>
