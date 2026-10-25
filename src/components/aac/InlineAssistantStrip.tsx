@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { Sparkles } from 'lucide-react';
+import { Sparkles, ArrowLeft, X } from 'lucide-react';
 import { generateSuggestions } from '@/lib/assistantEngine';
 import { useChildProfile } from '@/hooks/useChildProfile';
 import { VisualSuggestionCard } from './VisualSuggestionCard';
@@ -9,17 +9,10 @@ interface Props {
   language: 'english' | 'hindi';
   onSpeak: (text: string) => void;
   onAddToBoard?: (text: string) => void;
+  onClose?: () => void;
 }
 
-/**
- * Inline Communication Expansion Area.
- * Re-renders fresh, context-specific AAC suggestions every time `trigger`
- * changes. Three labeled sections:
- *   - Related Words
- *   - Current Level
- *   - Expanded Language
- */
-export default function InlineAssistantStrip({ trigger, language, onSpeak, onAddToBoard }: Props) {
+export default function InlineAssistantStrip({ trigger, language, onSpeak, onAddToBoard, onClose }: Props) {
   const { profile } = useChildProfile();
 
   const result = useMemo(() => {
@@ -44,12 +37,29 @@ export default function InlineAssistantStrip({ trigger, language, onSpeak, onAdd
       className="bg-gradient-to-r from-primary/5 to-accent/5 border-b-[3px] border-primary/30 p-3 space-y-3"
     >
       <div className="flex items-center gap-2">
+        {onClose && (
+          <button
+            onClick={onClose}
+            className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-card border-2 border-border text-xs font-bold text-foreground hover:bg-secondary"
+          >
+            <ArrowLeft size={14} /> {language === 'english' ? 'Back' : 'वापस'}
+          </button>
+        )}
         <Sparkles size={14} className="text-primary" />
-        <h3 className="text-xs font-bold text-primary uppercase tracking-wide">
+        <h3 className="flex-1 text-xs font-bold text-primary uppercase tracking-wide">
           {language === 'english'
             ? `Say more about "${trigger}"`
             : `"${trigger}" के बारे में और कहें`}
         </h3>
+        {onClose && (
+          <button
+            onClick={onClose}
+            aria-label="Close suggestions"
+            className="p-2 rounded-full bg-card border-2 border-border text-foreground hover:bg-secondary"
+          >
+            <X size={16} />
+          </button>
+        )}
       </div>
 
       {visible.map((section) => (
