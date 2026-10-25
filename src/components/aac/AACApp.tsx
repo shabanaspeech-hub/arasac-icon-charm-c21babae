@@ -250,9 +250,9 @@ export default function AACApp() {
           <Menu size={22} />
         </button>
         <img src={spectraLogo} alt="" className="w-8 h-8 rounded-full" />
-        <div className="hidden md:flex flex-col leading-tight">
-          <span className="font-extrabold text-base tracking-wide">VOXAFIA</span>
-          <span className="text-[10px] text-muted-foreground">Every Voice Deserves to Be Heard</span>
+        <div className="flex flex-col leading-tight min-w-0">
+          <span className="font-extrabold text-sm sm:text-base tracking-wide whitespace-nowrap">VOXAFIA AAC</span>
+          <span className="hidden sm:block text-[10px] text-muted-foreground whitespace-nowrap">Every Voice Deserves to Be Heard</span>
         </div>
         <div className="flex-1 flex justify-center">
           <div className="inline-flex rounded-xl border border-border bg-secondary p-1" role="tablist" aria-label="Board mode">
@@ -313,6 +313,26 @@ export default function AACApp() {
               </button>
             )}
             <h2 className="text-sm font-extrabold truncate">{currentTitle}</h2>
+          </div>
+          <div className="relative flex items-center gap-1 px-1 py-1.5 border-b border-border bg-card shrink-0">
+            <button onClick={() => document.getElementById('cat-ribbon')?.scrollBy({ left: -240, behavior: 'smooth' })} className="shrink-0 w-8 h-10 rounded-lg border border-border bg-card hover:bg-secondary font-bold" aria-label="Scroll categories left">‹</button>
+            <div id="cat-ribbon" className="flex-1 flex gap-1.5 overflow-x-auto scroll-smooth [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              {[
+                { k: '__beginner', icon: '🌟', name: language === 'english' ? 'Basic Needs' : 'बुनियादी', active: showBeginner && !searchQuery, go: openBeginner },
+                { k: '__fav', icon: '⭐', name: language === 'english' ? 'Favorites' : 'पसंदीदा', active: showFavorites && !searchQuery, go: openFavorites },
+                ...Object.entries(categories).map(([key, val]) => {
+                  const { icon, name } = splitLabel(language === 'english' ? val.en : val.hi);
+                  return { k: key, icon, name, active: key === currentCategory && !isCustomView && !showFavorites && !showBeginner && !searchQuery, go: () => openCategory(key) };
+                }),
+                ...customCategories.map(c => ({ k: c.id, icon: '📷', name: language === 'english' ? c.nameEn : c.nameHi, active: activeCustomCategory === c.id && !showFavorites && !showBeginner, go: () => openCustom(c.id) })),
+              ].map(c => (
+                <button key={c.k} onClick={c.go} aria-current={c.active ? 'page' : undefined}
+                  className={`shrink-0 flex items-center gap-1.5 px-3 h-10 rounded-full border text-xs font-bold whitespace-nowrap transition ${c.active ? 'bg-primary text-primary-foreground border-primary' : 'bg-secondary border-border hover:bg-card'}`}>
+                  <span className="text-lg" aria-hidden>{c.icon}</span>{c.name}
+                </button>
+              ))}
+            </div>
+            <button onClick={() => document.getElementById('cat-ribbon')?.scrollBy({ left: 240, behavior: 'smooth' })} className="shrink-0 w-10 h-10 rounded-lg bg-primary text-primary-foreground font-bold text-lg" aria-label="Scroll categories right">›</button>
           </div>
           <div className="flex-1 min-h-0 overflow-y-auto p-2">
         {/* Content */}
