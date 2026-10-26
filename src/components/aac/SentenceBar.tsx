@@ -20,7 +20,7 @@ function SentenceWordTile({ label, emoji, img, onRemove }: { label: string; emoj
   return (
     <button
       onClick={onRemove}
-      title={language neutral = ''}
+      title={label}
       className="inline-flex flex-col items-center bg-primary/5 p-1.5 rounded-lg border border-primary/40 cursor-pointer transition-all hover:bg-primary/10 hover:-translate-y-0.5 min-w-[64px]"
     >
       {img ? (
