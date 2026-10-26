@@ -200,9 +200,27 @@ export default function AACApp() {
     return i > 0 ? { icon: label.slice(0, i), name: label.slice(i + 1) } : { icon: '📁', name: label };
   };
 
+  // Folder cards shown beside the Beginner board so a child can jump anywhere.
+  const beginnerFolders = [
+    { key: '__fav', name: language === 'english' ? 'Favorites' : 'पसंदीदा', active: showFavorites && !searchQuery, go: openFavorites },
+    ...Object.entries(categories).filter(([key]) => key !== 'keyboard').map(([key, val]) => ({
+      key,
+      name: splitLabel(language === 'english' ? val.en : val.hi).name,
+      active: key === currentCategory && !isCustomView && !showFavorites && !showBeginner && !searchQuery,
+      go: () => openCategory(key),
+    })),
+    ...customCategories.map(c => ({
+      key: c.id,
+      name: language === 'english' ? c.nameEn : c.nameHi,
+      active: activeCustomCategory === c.id && !showFavorites && !showBeginner,
+      go: () => openCustom(c.id),
+    })),
+  ];
+  };
+
   const currentTitle = searchQuery.trim()
     ? (language === 'english' ? `Search: “${searchQuery}”` : `खोज: “${searchQuery}”`)
-    : showBeginner ? (language === 'english' ? 'Beginner' : 'शुरुआती')
+    : showBeginner ? (language === 'english' ? 'Beginner — Basic Needs' : 'शुरुआती — बुनियादी ज़रूरतें')
     : showFavorites ? (language === 'english' ? 'Favorites' : 'पसंदीदा')
     : isCustomView ? (() => { const c = customCategories.find(c => c.id === activeCustomCategory); return c ? (language === 'english' ? c.nameEn : c.nameHi) : ''; })()
     : splitLabel(language === 'english' ? categories[currentCategory]?.en ?? '' : categories[currentCategory]?.hi ?? '').name;
@@ -245,20 +263,20 @@ export default function AACApp() {
   return (
     <div className="h-[100dvh] flex flex-col bg-background text-foreground overflow-hidden">
       {/* Top bar */}
-      <header className="flex items-center gap-2 px-3 py-2 bg-card border-b border-border shrink-0">
-        <button onClick={() => setFolderSheetOpen(true)} className="lg:hidden p-2 rounded-lg hover:bg-secondary" aria-label="Open folders">
+      <header className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-2 bg-card border-b border-border shrink-0">
+        <button onClick={() => setFolderSheetOpen(true)} className="md:hidden p-2 -ml-1 rounded-lg hover:bg-secondary shrink-0" aria-label="Open folders">
           <Menu size={22} />
         </button>
-        <img src={spectraLogo} alt="" className="w-8 h-8 rounded-full" />
-        <div className="flex flex-col leading-tight min-w-0">
+        <img src={spectraLogo} alt="" className="w-8 h-8 rounded-full shrink-0" />
+        <div className="hidden min-[430px]:flex flex-col leading-tight min-w-0">
           <span className="font-extrabold text-sm sm:text-base tracking-wide whitespace-nowrap">VOXAFIA AAC</span>
           <span className="hidden sm:block text-[10px] text-muted-foreground whitespace-nowrap">Every Voice Deserves to Be Heard</span>
         </div>
-        <div className="flex-1 flex justify-center">
-          <div className="inline-flex rounded-xl border border-border bg-secondary p-1" role="tablist" aria-label="Board mode">
+        <div className="flex-1 flex justify-center min-w-0">
+          <div className="inline-flex rounded-xl border border-border bg-secondary p-1 max-w-full">
             {(() => {
               const typing = currentCategory === 'keyboard' && !showBeginner && !showFavorites && !activeCustomCategory;
-              const cls = (on: boolean) => `px-3 py-1.5 rounded-lg text-sm font-bold transition ${on ? 'bg-card shadow text-foreground' : 'text-muted-foreground'}`;
+              const cls = (on: boolean) => 'px-2.5 sm:px-3 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition whitespace-nowrap ' + (on ? 'bg-card shadow text-foreground' : 'text-muted-foreground');
               return (<>
                 <button role="tab" aria-selected={!typing} onClick={openBeginner} className={cls(!typing)}>🖼️ {language === 'english' ? 'Pictures' : 'चित्र'}</button>
                 <button role="tab" aria-selected={typing} onClick={() => openCategory('keyboard')} className={cls(typing)}>⌨️ {language === 'english' ? 'Type' : 'टाइप'}</button>
@@ -266,8 +284,8 @@ export default function AACApp() {
             })()}
           </div>
         </div>
-        {editMode && <span className="text-xs font-bold px-2 py-1 rounded-md bg-warning text-warning-foreground">{language === 'english' ? 'Edit mode' : 'एडिट मोड'}</span>}
-        <button onClick={() => setSettingsOpen(true)} className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-border text-sm font-bold hover:bg-secondary" aria-label="Settings">
+        {editMode && <span className="hidden sm:inline text-xs font-bold px-2 py-1 rounded-md bg-warning text-warning-foreground shrink-0">{language === 'english' ? 'Edit mode' : 'एडिट मोड'}</span>}
+        <button onClick={() => setSettingsOpen(true)} className="p-2 sm:px-3 sm:py-2 rounded-lg border border-border text-sm font-bold hover:bg-secondary shrink-0" aria-label="Settings">
           <Settings size={18} /> <span className="hidden sm:inline">{language === 'english' ? 'Settings' : 'सेटिंग्स'}</span>
         </button>
       </header>
@@ -300,7 +318,7 @@ export default function AACApp() {
 
       <div className="flex-1 flex min-h-0">
         {/* Side folder dock */}
-        <aside className="hidden lg:block w-56 shrink-0 border-r border-border bg-card overflow-y-auto p-2">
+        <aside className="hidden md:block w-52 shrink-0 border-r border-border bg-card overflow-y-auto p-2">
           {folderList}
         </aside>
 
@@ -314,6 +332,7 @@ export default function AACApp() {
             )}
             <h2 className="text-sm font-extrabold truncate">{currentTitle}</h2>
           </div>
+          {!showBeginner && (
           <div className="relative flex items-center gap-1 px-1 py-1.5 border-b border-border bg-card shrink-0">
             <button onClick={() => document.getElementById('cat-ribbon')?.scrollBy({ left: -240, behavior: 'smooth' })} className="shrink-0 w-8 h-10 rounded-lg border border-border bg-card hover:bg-secondary font-bold" aria-label="Scroll categories left">‹</button>
             <div id="cat-ribbon" className="flex-1 flex gap-1.5 overflow-x-auto scroll-smooth [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
@@ -334,10 +353,11 @@ export default function AACApp() {
             </div>
             <button onClick={() => document.getElementById('cat-ribbon')?.scrollBy({ left: 240, behavior: 'smooth' })} className="shrink-0 w-10 h-10 rounded-lg bg-primary text-primary-foreground font-bold text-lg" aria-label="Scroll categories right">›</button>
           </div>
+          )}
           <div className="flex-1 min-h-0 overflow-y-auto p-2">
         {/* Content */}
         {showBeginner ? (
-          <BeginnerBoard language={language} onSelect={handleBeginnerTap} />
+          <BeginnerBoard language={language} onSelect={handleBeginnerTap} folders={beginnerFolders.map(f => ({ key: f.key, name: f.name, active: f.active, onClick: f.go }))} />
         ) : showFavorites ? (
           favoriteEntries.length === 0 ? (
             <p className="text-center text-muted-foreground py-12 px-4">

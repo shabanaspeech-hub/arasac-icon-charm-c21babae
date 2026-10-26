@@ -19,7 +19,7 @@ const EMOJI_MAP: Record<string, string> = {
   yes: '✅', no: '❌', like: '❤️',
 };
 
-function pickKeyword(text: string): string {
+export function pickKeyword(text: string): string {
   const words = text.toLowerCase().replace(/[.,!?'"]/g, '').split(/\s+/).filter(Boolean);
   // skip pronouns/short fillers
   const skip = new Set(['i', 'a', 'an', 'the', 'is', 'am', 'to', 'me', 'you', 'it', 'we', 'do', 'can', 'my', 'your']);
