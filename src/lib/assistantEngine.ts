@@ -230,54 +230,54 @@ function genByCategory(word: string, cat: Category): {
   switch (cat) {
     case 'person':
       return {
-        related: [`Hug ${t}`, `Love ${t}`, `${t} Help`, `Where ${t}`, `${t} Come`],
-        current: [`Want ${t}`, `Hug ${t}`, `${t} Help`],
-        expanded: [`I want ${lower}.`, `${t}, can you help me?`, `I love you, ${t}.`],
+        related: [`Hug ${t}`, `I love ${t}`, `Where is ${t}?`, `${t}, come here`, `${t}, help me`],
+        current: [`I want ${t}`, `Hug ${t}`, `${t}, help me`],
+        expanded: [`I want my ${lower}.`, `${t}, can you help me please?`, `I love you, ${t}.`],
       };
     case 'emotion':
     case 'state':
       return {
-        related: [`I ${t}`, `So ${t}`, `Feel ${t}`, `Very ${t}`],
-        current: [`I ${t}`, `Feel ${t}`, `So ${t}`],
-        expanded: [`I am ${lower}.`, `I feel ${lower} right now.`, `I am very ${lower}.`],
+        related: [`I am ${t}`, `I feel ${t}`, `Very ${t}`, `Need help`, `All ${t}`],
+        current: [`I am ${t}`, `I feel ${t}`, `So ${t}`],
+        expanded: [`I am ${lower}.`, `I feel ${lower} right now.`, `I am very ${lower} today.`],
       };
     case 'action':
       return {
-        related: [`Want ${t}`, `${t} More`, `${t} Now`, `${t} Please`],
-        current: [`Want ${t}`, `${t} More`, `${t} Now`],
-        expanded: [`I want to ${lower}.`, `Can we ${lower}?`, `I would like to ${lower} please.`],
+        related: [`I want to ${t}`, `Let’s ${t}`, `Can I ${t}?`, `${t} again`, `${t} now`],
+        current: [`I want to ${lower}`, `Let’s ${lower}`, `Can I ${lower}?`],
+        expanded: [`I want to ${lower} now.`, `Can we ${lower} together?`, `Let’s ${lower} please.`],
       };
     case 'place':
       return {
-        related: [`Go ${t}`, `At ${t}`, `My ${t}`, `Want ${t}`],
-        current: [`Go ${t}`, `Want ${t}`, `At ${t}`],
-        expanded: [`I want to go to ${lower}.`, `Let’s go to ${lower}.`, `I am at ${lower}.`],
+        related: [`Go to ${t}`, `I want to go to ${t}`, `Take me to ${t}`, `Let’s go to ${t}`],
+        current: [`Go to ${t}`, `I want to go to ${t}`, `Let’s go to ${t}`],
+        expanded: [`I want to go to ${lower}.`, `Let’s go to ${lower} now.`, `Take me to ${lower} please.`],
       };
     case 'food':
     case 'drink':
     case 'object':
       return {
-        related: [`Big ${t}`, `My ${t}`, `More ${t}`, `Want ${t}`, `${t} Please`],
-        current: [`Want ${t}`, `More ${t}`, `My ${t}`],
+        related: [`More ${t}`, `I want ${t}`, `${t} please`, `Big ${t}`, `My ${t}`],
+        current: [`I want ${t}`, `More ${t}`, `${t} please`],
         expanded: [`I want ${article(lower)}${lower}.`, `Can I have ${article(lower)}${lower} please?`, `I like ${lower}.`],
       };
     case 'request':
       return {
-        related: [`${t} Please`, `${t} Me`, `${t} Now`, `Need ${t}`],
-        current: [`${t} Please`, `${t} Me`, `Need ${t}`],
-        expanded: [`I need ${lower} please.`, `Can you ${lower} me?`, `Please ${lower} now.`],
+        related: [`${t} please`, `Need ${t}`, `${t} now`],
+        current: [`${t} please`, `Need ${t}`],
+        expanded: [`I need ${lower} please.`, `Can you ${lower} for me?`, `Please ${lower} now.`],
       };
     case 'affirm':
       return {
-        related: [`${t} Please`, `${t} Thanks`, `${t} I Do`],
-        current: [`${t} Please`, `${t} Thanks`],
-        expanded: [`${t} please.`, `${t}, thank you.`],
+        related: ['Okay', 'Sure', `${t} please`, 'I agree'],
+        current: [`${t} please`, 'Okay', 'Sure'],
+        expanded: [`${t} please.`, `${t}, thank you.`, 'Okay, I would like that.'],
       };
     case 'body':
       return {
-        related: [`${t} Hurts`, `My ${t}`, `Help ${t}`, `Owie`],
-        current: [`${t} Hurts`, `My ${t}`, `Help Me`],
-        expanded: [`My ${lower} hurts.`, `I have ${lower}.`, `Please help, my ${lower} hurts.`],
+        related: [`My ${t} hurts`, `Help me`, `Owie`, `Mom, help`, `Need rest`],
+        current: [`My ${t} hurts`, `Help me`, `I hurt`],
+        expanded: [`My ${lower} hurts.`, `I have pain in my ${lower}.`, `Please help, my ${lower} hurts.`],
       };
   }
 }
