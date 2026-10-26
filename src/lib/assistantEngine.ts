@@ -76,27 +76,27 @@ const OVERRIDES: Record<string, Partial<AssistantResult>> = {
   },
   play: {
     relatedWords: ['Ball', 'Bubbles', 'Swing', 'Outside', 'With Me'],
-    currentLevel: ['Want Play', 'Play Outside', 'Play With Me', 'Play Ball'],
+    currentLevel: ['I want to play', 'Play outside', 'Play with me', 'Play ball'],
     expandedLanguage: ['I want to play.', 'Can we play outside?', 'Will you play with me?'],
   },
   eat: {
-    relatedWords: ['Apple', 'Snack', 'Lunch', 'Food', 'Hungry'],
-    currentLevel: ['Want Eat', 'Eat More', 'Eat Apple', 'I Hungry'],
+    relatedWords: ['Apple', 'Snack', 'Lunch', 'Hungry', 'Yummy'],
+    currentLevel: ['I want to eat', 'More to eat', 'I am hungry'],
     expandedLanguage: ['I want to eat.', 'I am hungry.', 'Can I have a snack please?'],
   },
   drink: {
     relatedWords: ['Water', 'Milk', 'Juice', 'Thirsty', 'Cup'],
-    currentLevel: ['Want Drink', 'Drink Water', 'Drink Milk', 'I Thirsty'],
+    currentLevel: ['I want a drink', 'Drink water', 'I am thirsty'],
     expandedLanguage: ['I want a drink.', 'I am thirsty.', 'Can I have some water please?'],
   },
   go: {
     relatedWords: ['Outside', 'Home', 'Park', 'Car', 'School'],
-    currentLevel: ['Go Outside', 'Go Home', 'Go Park', 'Want Go'],
+    currentLevel: ['Go outside', 'Go home', 'Let’s go'],
     expandedLanguage: ['I want to go outside.', 'Can we go to the park?', 'Let’s go home now.'],
   },
   sleep: {
     relatedWords: ['Bed', 'Tired', 'Pillow', 'Nap', 'Goodnight'],
-    currentLevel: ['Want Sleep', 'I Tired', 'Go Bed'],
+    currentLevel: ['I want to sleep', 'Time for bed', 'I am tired'],
     expandedLanguage: ['I want to sleep.', 'I am tired.', 'Time for bed.'],
   },
   happy: {
@@ -183,6 +183,16 @@ const OVERRIDES: Record<string, Partial<AssistantResult>> = {
     relatedWords: ['Stop', 'Done', 'All Done', 'Not Now', 'Don’t Like'],
     currentLevel: ['No Thanks', 'All Done', 'Not Now'],
     expandedLanguage: ['No thank you.', 'No, I am all done.', 'No, I don’t want that.'],
+  },
+  stop: {
+    relatedWords: ['Stop Please', 'All Done', 'No More', 'Wait', 'Quiet'],
+    currentLevel: ['Stop please', 'All done', 'No more'],
+    expandedLanguage: ['Please stop.', 'I want you to stop now.', 'No more, I am all done.'],
+  },
+  want: {
+    relatedWords: ['I Want It', 'I Want That', 'My Turn', 'Give Me Please'],
+    currentLevel: ['I want it', 'I want that', 'My turn'],
+    expandedLanguage: ['I want that please.', 'Can I have it?', 'It is my turn now.'],
   },
 };
 
