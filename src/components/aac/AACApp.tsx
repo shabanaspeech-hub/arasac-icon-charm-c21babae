@@ -332,6 +332,7 @@ export default function AACApp() {
             )}
             <h2 className="text-sm font-extrabold truncate">{currentTitle}</h2>
           </div>
+          {!showBeginner && (
           <div className="relative flex items-center gap-1 px-1 py-1.5 border-b border-border bg-card shrink-0">
             <button onClick={() => document.getElementById('cat-ribbon')?.scrollBy({ left: -240, behavior: 'smooth' })} className="shrink-0 w-8 h-10 rounded-lg border border-border bg-card hover:bg-secondary font-bold" aria-label="Scroll categories left">‹</button>
             <div id="cat-ribbon" className="flex-1 flex gap-1.5 overflow-x-auto scroll-smooth [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
@@ -352,6 +353,7 @@ export default function AACApp() {
             </div>
             <button onClick={() => document.getElementById('cat-ribbon')?.scrollBy({ left: 240, behavior: 'smooth' })} className="shrink-0 w-10 h-10 rounded-lg bg-primary text-primary-foreground font-bold text-lg" aria-label="Scroll categories right">›</button>
           </div>
+          )}
           <div className="flex-1 min-h-0 overflow-y-auto p-2">
         {/* Content */}
         {showBeginner ? (
