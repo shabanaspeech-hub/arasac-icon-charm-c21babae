@@ -200,9 +200,27 @@ export default function AACApp() {
     return i > 0 ? { icon: label.slice(0, i), name: label.slice(i + 1) } : { icon: '📁', name: label };
   };
 
+  // Folder cards shown beside the Beginner board so a child can jump anywhere.
+  const beginnerFolders = [
+    { key: '__fav', name: language === 'english' ? 'Favorites' : 'पसंदीदा', active: showFavorites && !searchQuery, go: openFavorites },
+    ...Object.entries(categories).filter(([key]) => key !== 'keyboard').map(([key, val]) => ({
+      key,
+      name: splitLabel(language === 'english' ? val.en : val.hi).name,
+      active: key === currentCategory && !isCustomView && !showFavorites && !showBeginner && !searchQuery,
+      go: () => openCategory(key),
+    })),
+    ...customCategories.map(c => ({
+      key: c.id,
+      name: language === 'english' ? c.nameEn : c.nameHi,
+      active: activeCustomCategory === c.id && !showFavorites && !showBeginner,
+      go: () => openCustom(c.id),
+    })),
+  ];
+  };
+
   const currentTitle = searchQuery.trim()
     ? (language === 'english' ? `Search: “${searchQuery}”` : `खोज: “${searchQuery}”`)
-    : showBeginner ? (language === 'english' ? 'Beginner' : 'शुरुआती')
+    : showBeginner ? (language === 'english' ? 'Beginner — Basic Needs' : 'शुरुआती — बुनियादी ज़रूरतें')
     : showFavorites ? (language === 'english' ? 'Favorites' : 'पसंदीदा')
     : isCustomView ? (() => { const c = customCategories.find(c => c.id === activeCustomCategory); return c ? (language === 'english' ? c.nameEn : c.nameHi) : ''; })()
     : splitLabel(language === 'english' ? categories[currentCategory]?.en ?? '' : categories[currentCategory]?.hi ?? '').name;
@@ -337,7 +355,7 @@ export default function AACApp() {
           <div className="flex-1 min-h-0 overflow-y-auto p-2">
         {/* Content */}
         {showBeginner ? (
-          <BeginnerBoard language={language} onSelect={handleBeginnerTap} />
+          <BeginnerBoard language={language} onSelect={handleBeginnerTap} folders={beginnerFolders.map(f => ({ key: f.key, name: f.name, active: f.active, onClick: f.go }))} />
         ) : showFavorites ? (
           favoriteEntries.length === 0 ? (
             <p className="text-center text-muted-foreground py-12 px-4">
