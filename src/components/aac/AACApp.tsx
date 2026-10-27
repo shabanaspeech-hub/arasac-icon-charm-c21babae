@@ -22,6 +22,7 @@ import CustomItemCard from './CustomItemCard';
 import PagedGrid, { type PagedGridItem } from './PagedGrid';
 import InlineAssistantStrip from './InlineAssistantStrip';
 import BeginnerBoard, { type BeginnerWord } from './BeginnerBoard';
+import CategoryPictogram from './CategoryPictogram';
 
 
 const wordColors: Record<string, string> = {
@@ -29,9 +30,15 @@ const wordColors: Record<string, string> = {
   preposition: '🟧', question: '🟫', feeling: '🟥', social: '⬜'
 };
 
-export default function AACApp() {
+type HomeChoice = 'beginner' | 'folders' | 'core';
+
+export default function AACApp({ onReplayIntro }: { onReplayIntro?: () => void } = {}) {
+  const [homePage, setHomePageState] = useState<HomeChoice>(() => (localStorage.getItem('voxafia-home') as HomeChoice) || 'beginner');
+  const setHomePage = (h: HomeChoice) => { setHomePageState(h); localStorage.setItem('voxafia-home', h); };
+  const [showFolders, setShowFolders] = useState(() => localStorage.getItem('voxafia-home') === 'folders');
   const [language, setLanguage] = useState<'english' | 'hindi'>('english');
   const [currentCategory, setCurrentCategory] = useState<string>('core');
+  const initialHome = (typeof localStorage !== 'undefined' && localStorage.getItem('voxafia-home')) || 'beginner';
   const [sentence, setSentence] = useState<AACSymbol[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [editMode, setEditMode] = useState(false);
@@ -41,7 +48,7 @@ export default function AACApp() {
   const [editingItem, setEditingItem] = useState<any>(null);
   const [activeCustomCategory, setActiveCustomCategory] = useState<string | null>(null);
   const [showFavorites, setShowFavorites] = useState(false);
-  const [showBeginner, setShowBeginner] = useState(true);
+  const [showBeginner, setShowBeginner] = useState(initialHome === 'beginner');
   const [assistantTrigger, setAssistantTrigger] = useState<string>('');
   const [folderSheetOpen, setFolderSheetOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -189,11 +196,15 @@ export default function AACApp() {
     }
   });
 
-  const goFolder = (fn: () => void) => { fn(); setSearchQuery(''); setFolderSheetOpen(false); };
+  const goFolder = (fn: () => void) => { setShowFolders(false); fn(); setSearchQuery(''); setFolderSheetOpen(false); };
   const openBeginner = () => goFolder(() => { setShowBeginner(true); setShowFavorites(false); setActiveCustomCategory(null); });
   const openFavorites = () => goFolder(() => { setShowFavorites(true); setShowBeginner(false); setActiveCustomCategory(null); });
   const openCategory = (key: string) => goFolder(() => { setCurrentCategory(key); setActiveCustomCategory(null); setShowFavorites(false); setShowBeginner(false); });
   const openCustom = (id: string) => goFolder(() => { setActiveCustomCategory(id); setShowFavorites(false); setShowBeginner(false); });
+
+  const openAllFolders = () => goFolder(() => { setShowBeginner(false); setShowFavorites(false); setActiveCustomCategory(null); setShowFolders(true); });
+  const openHome = () => homePage === 'folders' ? openAllFolders() : homePage === 'core' ? openCategory('core') : openBeginner();
+  const atHome = homePage === 'folders' ? showFolders : homePage === 'core' ? (currentCategory === 'core' && !showBeginner && !showFavorites && !activeCustomCategory && !showFolders) : showBeginner;
 
   const splitLabel = (label: string) => {
     const i = label.indexOf(' ');
@@ -216,10 +227,10 @@ export default function AACApp() {
       go: () => openCustom(c.id),
     })),
   ];
-  };
 
   const currentTitle = searchQuery.trim()
     ? (language === 'english' ? `Search: “${searchQuery}”` : `खोज: “${searchQuery}”`)
+        : showFolders ? (language === 'english' ? 'All Folders' : 'सभी फ़ोल्डर')
     : showBeginner ? (language === 'english' ? 'Beginner — Basic Needs' : 'शुरुआती — बुनियादी ज़रूरतें')
     : showFavorites ? (language === 'english' ? 'Favorites' : 'पसंदीदा')
     : isCustomView ? (() => { const c = customCategories.find(c => c.id === activeCustomCategory); return c ? (language === 'english' ? c.nameEn : c.nameHi) : ''; })()
@@ -240,12 +251,13 @@ export default function AACApp() {
 
   const folderList = (
     <nav className="flex flex-col gap-1.5" aria-label="Folders">
+      <DockItem active={showFolders && !searchQuery} icon="🗂️" label={language === 'english' ? 'All Folders' : 'सभी फ़ोल्डर'} onClick={openAllFolders} />
       <DockItem active={showBeginner && !searchQuery} icon="🌟" label={language === 'english' ? 'Beginner' : 'शुरुआती'} onClick={openBeginner} />
       <DockItem active={showFavorites && !searchQuery} icon={<Star size={18} className="mx-auto" />} label={`${language === 'english' ? 'Favorites' : 'पसंदीदा'} (${favorites.length})`} onClick={openFavorites} />
       <div className="h-px bg-border my-1.5" />
       {Object.entries(categories).map(([key, val]) => {
         const { icon, name } = splitLabel(language === 'english' ? val.en : val.hi);
-        const active = key === currentCategory && !isCustomView && !showFavorites && !showBeginner && !searchQuery;
+        const active = key === currentCategory && !isCustomView && !showFavorites && !showBeginner && !showFolders && !searchQuery;
         return <DockItem key={key} active={active} icon={icon} label={name} onClick={() => openCategory(key)} />;
       })}
       {(customCategories.length > 0 || editMode) && <div className="h-px bg-border my-1.5" />}
@@ -275,10 +287,10 @@ export default function AACApp() {
         <div className="flex-1 flex justify-center min-w-0">
           <div className="inline-flex rounded-xl border border-border bg-secondary p-1 max-w-full">
             {(() => {
-              const typing = currentCategory === 'keyboard' && !showBeginner && !showFavorites && !activeCustomCategory;
+              const typing = currentCategory === 'keyboard' && !showBeginner && !showFavorites && !showFolders && !activeCustomCategory;
               const cls = (on: boolean) => 'px-2.5 sm:px-3 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition whitespace-nowrap ' + (on ? 'bg-card shadow text-foreground' : 'text-muted-foreground');
               return (<>
-                <button role="tab" aria-selected={!typing} onClick={openBeginner} className={cls(!typing)}>🖼️ {language === 'english' ? 'Pictures' : 'चित्र'}</button>
+                <button role="tab" aria-selected={!typing} onClick={openHome} className={cls(!typing)}>🖼️ {language === 'english' ? 'Pictures' : 'चित्र'}</button>
                 <button role="tab" aria-selected={typing} onClick={() => openCategory('keyboard')} className={cls(typing)}>⌨️ {language === 'english' ? 'Type' : 'टाइप'}</button>
               </>);
             })()}
@@ -325,14 +337,14 @@ export default function AACApp() {
         {/* Board */}
         <main className="flex-1 min-w-0 flex flex-col">
           <div className="flex items-center gap-2 px-3 py-1.5 border-b border-border bg-card shrink-0">
-            {!showBeginner && (
-              <button onClick={openBeginner} className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-border text-xs font-bold hover:bg-secondary" aria-label="Home">
+            {!atHome && (
+              <button onClick={openHome} className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-border text-xs font-bold hover:bg-secondary" aria-label="Home">
                 <Home size={14} /> {language === 'english' ? 'Home' : 'होम'}
               </button>
             )}
             <h2 className="text-sm font-extrabold truncate">{currentTitle}</h2>
           </div>
-          {!showBeginner && (
+          {!showBeginner && !showFolders && (
           <div className="relative flex items-center gap-1 px-1 py-1.5 border-b border-border bg-card shrink-0">
             <button onClick={() => document.getElementById('cat-ribbon')?.scrollBy({ left: -240, behavior: 'smooth' })} className="shrink-0 w-8 h-10 rounded-lg border border-border bg-card hover:bg-secondary font-bold" aria-label="Scroll categories left">‹</button>
             <div id="cat-ribbon" className="flex-1 flex gap-1.5 overflow-x-auto scroll-smooth [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
@@ -356,7 +368,16 @@ export default function AACApp() {
           )}
           <div className="flex-1 min-h-0 overflow-y-auto p-2">
         {/* Content */}
-        {showBeginner ? (
+        {showFolders && !searchQuery ? (
+          <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 p-2">
+            {[{ key: '__beginner', name: language === 'english' ? 'Basic Needs' : 'बुनियादी', go: openBeginner }, ...beginnerFolders].map(f => (
+              <button key={f.key} onClick={f.go} className="folder-card group flex flex-col items-center justify-center gap-2 p-3 rounded-2xl border border-border bg-card min-h-[120px] sm:min-h-[140px] shadow-sm hover:shadow-md hover:-translate-y-0.5 hover:border-primary active:scale-95 transition-all">
+                <CategoryPictogram categoryKey={f.key} name={f.name} className="!w-14 !h-14 sm:!w-16 sm:!h-16" />
+                <span className="text-xs sm:text-sm font-extrabold text-center leading-tight">{f.name}</span>
+              </button>
+            ))}
+          </div>
+        ) : showBeginner ? (
           <BeginnerBoard language={language} onSelect={handleBeginnerTap} folders={beginnerFolders.map(f => ({ key: f.key, name: f.name, active: f.active, onClick: f.go }))} />
         ) : showFavorites ? (
           favoriteEntries.length === 0 ? (
@@ -483,6 +504,21 @@ export default function AACApp() {
                   className="w-full pl-9 pr-3 py-2.5 border border-border rounded-lg bg-card focus:border-primary focus:outline-none"
                 />
               </div>
+            </section>
+            <section className="space-y-2">
+              <h3 className="text-xs font-bold uppercase text-muted-foreground">{language === 'english' ? 'Home page' : 'होम पेज'}</h3>
+              <div className="grid grid-cols-3 gap-2">
+                {([['beginner', 'Basic Needs', 'बुनियादी'], ['folders', 'All Folders', 'फ़ोल्डर'], ['core', 'Core Words', 'मुख्य शब्द']] as const).map(([k, en, hi]) => (
+                  <button key={k} onClick={() => { setHomePage(k); }} className={`py-2 px-1 rounded-lg text-xs font-bold border ${homePage === k ? 'bg-primary text-primary-foreground border-primary' : 'bg-card border-border'}`}>
+                    {language === 'english' ? en : hi}
+                  </button>
+                ))}
+              </div>
+              {onReplayIntro && (
+                <button onClick={() => { setSettingsOpen(false); onReplayIntro(); }} className="w-full py-2 rounded-lg border border-border font-bold text-xs hover:bg-secondary">
+                  🌈 {language === 'english' ? 'Replay intro' : 'इंट्रो फिर से देखें'}
+                </button>
+              )}
             </section>
             <section className="space-y-2">
               <h3 className="text-xs font-bold uppercase text-muted-foreground">{language === 'english' ? 'Language' : 'भाषा'}</h3>

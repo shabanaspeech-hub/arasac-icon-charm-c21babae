@@ -73,7 +73,7 @@ export default function InlineAssistantStrip({ trigger, language, onSpeak, onAdd
                 <VisualSuggestionCard
                   text={text}
                   size={section.size}
-                  onTap={() => { onSpeak(text); onAddToBoard?.(text); }}
+                  onTap={() => { if (onAddToBoard) onAddToBoard(text); else onSpeak(text); }}
                 />
               </div>
             ))}

@@ -127,3 +127,37 @@
     padding-bottom: env(safe-area-inset-bottom, 8px);
   }
 }
+
+/* ===== VOXAFIA startup intro ===== */
+.splash-root { position: fixed; inset: 0; z-index: 100; overflow: hidden; display: flex; align-items: center; justify-content: center; font-family: 'Nunito', sans-serif; transition: opacity .5s ease; }
+.splash-leave { opacity: 0; }
+.splash-sky { position: absolute; inset: 0; background: linear-gradient(hsl(215 15% 45%), hsl(215 12% 65%)); animation: sky-clear 1.2s ease 1.6s forwards; }
+@keyframes sky-clear { to { background: linear-gradient(hsl(200 85% 82%), hsl(45 100% 96%)); filter: brightness(1.05); } }
+.splash-sky { background-size: 100% 100%; }
+.splash-root::before { content: ''; position: absolute; inset: 0; background: linear-gradient(hsl(200 85% 84%), hsl(45 100% 97%)); opacity: 0; animation: fade-in-sky 1.2s ease 1.6s forwards; }
+@keyframes fade-in-sky { to { opacity: 1; } }
+.splash-clouds { position: absolute; inset: 0; animation: clouds-away 1.4s ease 1.6s forwards; z-index: 2; }
+.splash-cloud { position: absolute; width: 180px; height: 60px; border-radius: 60px; background: hsl(215 10% 78%); box-shadow: 40px -25px 0 10px hsl(215 10% 72%), 95px -10px 0 0 hsl(215 10% 75%); }
+@keyframes clouds-away { to { opacity: 0; transform: translateY(-80px); } }
+.splash-rain { position: absolute; inset: 0; z-index: 1; animation: rain-stop .6s ease 1.5s forwards; }
+.splash-drop { position: absolute; top: -20px; width: 2px; height: 18px; border-radius: 2px; background: hsl(205 70% 88% / .85); animation-name: drop-fall; animation-timing-function: linear; animation-iteration-count: infinite; }
+@keyframes drop-fall { to { transform: translateY(110vh); } }
+@keyframes rain-stop { to { opacity: 0; } }
+.splash-rainbow { position: absolute; z-index: 3; width: min(90vw, 640px); aspect-ratio: 2/1; overflow: hidden; opacity: 0; clip-path: inset(0 100% 0 0); animation: rainbow-paint 1.2s ease-out 2s forwards, rainbow-spin 1s ease-in 3.6s forwards; }
+.splash-band { position: absolute; border-radius: 50%; border: 14px solid; }
+.splash-band-0 { border-color: hsl(0 85% 60%); } .splash-band-1 { border-color: hsl(28 95% 58%); } .splash-band-2 { border-color: hsl(50 95% 55%); }
+.splash-band-3 { border-color: hsl(130 55% 50%); } .splash-band-4 { border-color: hsl(200 80% 55%); } .splash-band-5 { border-color: hsl(240 60% 60%); } .splash-band-6 { border-color: hsl(280 55% 62%); }
+@keyframes rainbow-paint { 0% { opacity: 1; clip-path: inset(0 100% 0 0); } 100% { opacity: 1; clip-path: inset(0 0 0 0); } }
+@keyframes rainbow-spin { 0% { opacity: 1; clip-path: inset(0 0 0 0); transform: scale(1) rotate(0); } 100% { opacity: 0; clip-path: inset(0 0 0 0); transform: scale(.1) rotate(540deg); } }
+.splash-sparkles { position: absolute; inset: 0; z-index: 4; pointer-events: none; }
+.splash-sparkle { position: absolute; color: hsl(45 100% 60%); font-size: 22px; opacity: 0; animation: sparkle 1.4s ease-in-out forwards; text-shadow: 0 0 8px hsl(45 100% 70%); }
+@keyframes sparkle { 0%,100% { opacity: 0; transform: scale(.3); } 50% { opacity: 1; transform: scale(1.2) rotate(45deg); } }
+.splash-brand { position: relative; z-index: 5; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.splash-logo { width: 140px; height: 140px; border-radius: 9999px; background: hsl(0 0% 100%); box-shadow: 0 12px 40px hsl(215 40% 30% / .25); opacity: 0; transform: scale(0) rotate(-360deg); animation: logo-in 1s cubic-bezier(.34,1.56,.64,1) 4.2s forwards; }
+@keyframes logo-in { 60% { opacity: 1; transform: scale(1.15) rotate(0); } 80% { transform: scale(.92); } 100% { opacity: 1; transform: scale(1); } }
+.splash-name { display: flex; font-size: clamp(36px, 9vw, 64px); font-weight: 900; letter-spacing: .12em; color: hsl(220 45% 22%); }
+.splash-name span { opacity: 0; transform: translateY(20px) scale(.5); display: inline-block; animation: letter-pop .4s cubic-bezier(.34,1.56,.64,1) forwards; }
+@keyframes letter-pop { to { opacity: 1; transform: none; } }
+.splash-tagline { font-size: clamp(14px, 3.5vw, 20px); font-weight: 700; color: hsl(220 25% 38%); opacity: 0; animation: letter-pop .6s ease 5.6s forwards; }
+.splash-skip { position: absolute; top: 16px; right: 16px; z-index: 6; padding: 8px 16px; border-radius: 9999px; background: hsl(0 0% 100% / .8); color: hsl(220 45% 22%); font-weight: 800; font-size: 14px; }
+@media (prefers-reduced-motion: reduce) { .splash-root * { animation-duration: .01s !important; animation-delay: 0s !important; } }
