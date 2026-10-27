@@ -144,7 +144,7 @@
 @keyframes drop-fall { to { transform: translateY(110vh); } }
 @keyframes rain-stop { to { opacity: 0; } }
 .splash-rainbow { position: absolute; z-index: 3; width: min(90vw, 640px); aspect-ratio: 2/1; overflow: hidden; opacity: 0; clip-path: inset(0 100% 0 0); animation: rainbow-paint 1.2s ease-out 2s forwards, rainbow-spin 1s ease-in 3.6s forwards; }
-.splash-band { position: absolute; border-radius: 50% 50% 0 0 / 100% 100% 0 0; border: 14px solid; border-bottom: 0; height: auto; bottom: 0 !important; }
+.splash-band { position: absolute; border-radius: 50%; border: 14px solid; }
 .splash-band-0 { border-color: hsl(0 85% 60%); } .splash-band-1 { border-color: hsl(28 95% 58%); } .splash-band-2 { border-color: hsl(50 95% 55%); }
 .splash-band-3 { border-color: hsl(130 55% 50%); } .splash-band-4 { border-color: hsl(200 80% 55%); } .splash-band-5 { border-color: hsl(240 60% 60%); } .splash-band-6 { border-color: hsl(280 55% 62%); }
 @keyframes rainbow-paint { 0% { opacity: 1; clip-path: inset(0 100% 0 0); } 100% { opacity: 1; clip-path: inset(0 0 0 0); } }

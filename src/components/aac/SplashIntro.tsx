@@ -37,7 +37,7 @@ export default function SplashIntro({ onDone }: { onDone: () => void }) {
 
       {/* Rainbow */}
       <div className="splash-rainbow">
-        {[0, 1, 2, 3, 4, 5, 6].map(i => <span key={i} className={`splash-band splash-band-${i}`} style={{ inset: `${i * 14}px` }} />)}
+        {[0, 1, 2, 3, 4, 5, 6].map(i => <span key={i} className={`splash-band splash-band-${i}`} style={{ top: i * 14, left: i * 14, right: i * 14, height: `calc(200% - ${i * 28}px)` }} />)}
       </div>
       <div className="splash-sparkles">
         {sparkles.map(i => (
