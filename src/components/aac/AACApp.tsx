@@ -506,6 +506,21 @@ export default function AACApp({ onReplayIntro }: { onReplayIntro?: () => void }
               </div>
             </section>
             <section className="space-y-2">
+              <h3 className="text-xs font-bold uppercase text-muted-foreground">{language === 'english' ? 'Home page' : 'होम पेज'}</h3>
+              <div className="grid grid-cols-3 gap-2">
+                {([['beginner', 'Basic Needs', 'बुनियादी'], ['folders', 'All Folders', 'फ़ोल्डर'], ['core', 'Core Words', 'मुख्य शब्द']] as const).map(([k, en, hi]) => (
+                  <button key={k} onClick={() => { setHomePage(k); }} className={`py-2 px-1 rounded-lg text-xs font-bold border ${homePage === k ? 'bg-primary text-primary-foreground border-primary' : 'bg-card border-border'}`}>
+                    {language === 'english' ? en : hi}
+                  </button>
+                ))}
+              </div>
+              {onReplayIntro && (
+                <button onClick={() => { setSettingsOpen(false); onReplayIntro(); }} className="w-full py-2 rounded-lg border border-border font-bold text-xs hover:bg-secondary">
+                  🌈 {language === 'english' ? 'Replay intro' : 'इंट्रो फिर से देखें'}
+                </button>
+              )}
+            </section>
+            <section className="space-y-2">
               <h3 className="text-xs font-bold uppercase text-muted-foreground">{language === 'english' ? 'Language' : 'भाषा'}</h3>
               <div className="grid grid-cols-2 gap-2">
                 {(['english', 'hindi'] as const).map(l => (
