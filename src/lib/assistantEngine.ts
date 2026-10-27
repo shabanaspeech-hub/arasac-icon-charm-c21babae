@@ -38,8 +38,22 @@ const CATEGORY_MAP: Record<string, Category> = {
   ball: 'object', car: 'object', toy: 'object', book: 'object', bubbles: 'object',
 };
 
-function classify(word: string): Category {
-  return CATEGORY_MAP[word.toLowerCase()] || 'object';
+const EXTRA: Record<string, Category> = {
+  grandma: 'person', grandpa: 'person', doctor: 'person',
+  hurt_: 'body', hand: 'body', leg: 'body', ear: 'body', tooth: 'body', stomach: 'body',
+  love: 'emotion', worried: 'emotion', calm: 'emotion', bored: 'emotion',
+  walk: 'action', sit: 'action', read: 'action', draw: 'action', sing: 'action', dance: 'action', wash: 'action', cook: 'action', swim: 'action', open: 'action', come: 'action', watch: 'action', listen: 'action', bath: 'action',
+  garden: 'place', shop: 'place', market: 'place', hospital: 'place', kitchen: 'place', room: 'place', toilet: 'place',
+  cake: 'food', cookie: 'food', rice: 'food', egg: 'food', chocolate: 'food', mango: 'food', orange: 'food', biscuit: 'food', pizza: 'food', candy: 'food', icecream: 'food',
+  coffee: 'drink',
+  doll: 'object', blocks: 'object', puzzle: 'object', phone: 'object', tablet: 'object', tv: 'object', shoes: 'object', bag: 'object', crayons: 'object', swing: 'object', bike: 'object', train: 'object', teddy: 'object',
+};
+
+// Returns null for words we don't understand (pronouns, articles, colours…)
+// so the assistant stays quiet instead of inventing nonsense like "More I".
+function classify(word: string): Category | null {
+  const w = word.toLowerCase();
+  return CATEGORY_MAP[w] || EXTRA[w] || null;
 }
 
 // Curated overrides for common words (full set when meaningful).
@@ -237,19 +251,19 @@ function genByCategory(word: string, cat: Category): {
     case 'emotion':
     case 'state':
       return {
-        related: [`I am ${t}`, `I feel ${t}`, `Very ${t}`, `Need help`, `All ${t}`],
-        current: [`I am ${t}`, `I feel ${t}`, `So ${t}`],
+        related: [`Very ${t}`, `So ${t}`, `Not ${t}`],
+        current: [`I am ${t}`, `I feel ${t}`],
         expanded: [`I am ${lower}.`, `I feel ${lower} right now.`, `I am very ${lower} today.`],
       };
     case 'action':
       return {
-        related: [`I want to ${t}`, `Let’s ${t}`, `Can I ${t}?`, `${t} again`, `${t} now`],
+        related: [`${t} again`, `${t} now`, `${t} more`, `Stop ${lower}`],
         current: [`I want to ${lower}`, `Let’s ${lower}`, `Can I ${lower}?`],
         expanded: [`I want to ${lower} now.`, `Can we ${lower} together?`, `Let’s ${lower} please.`],
       };
     case 'place':
       return {
-        related: [`Go to ${t}`, `I want to go to ${t}`, `Take me to ${t}`, `Let’s go to ${t}`],
+        related: [`Go ${lower}`, `At ${lower}`, `Not ${lower}`],
         current: [`Go to ${t}`, `I want to go to ${t}`, `Let’s go to ${t}`],
         expanded: [`I want to go to ${lower}.`, `Let’s go to ${lower} now.`, `Take me to ${lower} please.`],
       };
@@ -257,25 +271,25 @@ function genByCategory(word: string, cat: Category): {
     case 'drink':
     case 'object':
       return {
-        related: [`More ${t}`, `I want ${t}`, `${t} please`, `Big ${t}`, `My ${t}`],
+        related: [`Big ${t}`, `My ${t}`, `No ${lower}`, `All done ${lower}`],
         current: [`I want ${t}`, `More ${t}`, `${t} please`],
         expanded: [`I want ${article(lower)}${lower}.`, `Can I have ${article(lower)}${lower} please?`, `I like ${lower}.`],
       };
     case 'request':
       return {
-        related: [`${t} please`, `Need ${t}`, `${t} now`],
+        related: [`${t} now`, `${t} me`],
         current: [`${t} please`, `Need ${t}`],
         expanded: [`I need ${lower} please.`, `Can you ${lower} for me?`, `Please ${lower} now.`],
       };
     case 'affirm':
       return {
-        related: ['Okay', 'Sure', `${t} please`, 'I agree'],
-        current: [`${t} please`, 'Okay', 'Sure'],
+        related: ['Okay', 'Sure', 'Thank you'],
+        current: [`${t} please`, `${t}, thank you`],
         expanded: [`${t} please.`, `${t}, thank you.`, 'Okay, I would like that.'],
       };
     case 'body':
       return {
-        related: [`My ${t} hurts`, `Help me`, `Owie`, `Mom, help`, `Need rest`],
+        related: [`Hurts a lot`, `Need a doctor`, `Need rest`],
         current: [`My ${t} hurts`, `Help me`, `I hurt`],
         expanded: [`My ${lower} hurts.`, `I have pain in my ${lower}.`, `Please help, my ${lower} hurts.`],
       };
@@ -305,14 +319,24 @@ export function generateSuggestions(trigger: string, profile: ChildProfile): Ass
     return { trigger, relatedWords: [], currentLevel: [], expandedLanguage: [] };
   }
   const cat = classify(key);
-  const gen = genByCategory(key, cat);
-  const override = OVERRIDES[key] || {};
+  const override = OVERRIDES[key];
+  if (!cat && !override) {
+    return { trigger, relatedWords: [], currentLevel: [], expandedLanguage: [] };
+  }
+  const gen = cat ? genByCategory(key, cat) : { related: [], current: [], expanded: [] };
+  const o = override || {};
 
+  // De-duplicate across sections so the same phrase never shows (or speaks) twice.
+  const seen = new Set<string>([key]);
+  const take = (list: string[]) => uniq(list).filter(x => {
+    const k = x.toLowerCase().replace(/[.?!]/g, '').trim();
+    if (seen.has(k)) return false; seen.add(k); return true;
+  });
   return scaleForProfile({
     trigger,
-    relatedWords: uniq(override.relatedWords ?? gen.related),
-    currentLevel: uniq(override.currentLevel ?? gen.current),
-    expandedLanguage: uniq(override.expandedLanguage ?? gen.expanded),
+    relatedWords: take(o.relatedWords ?? gen.related),
+    currentLevel: take(o.currentLevel ?? gen.current),
+    expandedLanguage: take(o.expandedLanguage ?? gen.expanded),
   }, profile);
 }
 
