@@ -161,3 +161,8 @@
 .splash-tagline { font-size: clamp(14px, 3.5vw, 20px); font-weight: 700; color: hsl(220 25% 38%); opacity: 0; animation: letter-pop .6s ease 5.6s forwards; }
 .splash-skip { position: absolute; top: 16px; right: 16px; z-index: 6; padding: 8px 16px; border-radius: 9999px; background: hsl(0 0% 100% / .8); color: hsl(220 45% 22%); font-weight: 800; font-size: 14px; }
 @media (prefers-reduced-motion: reduce) { .splash-root * { animation-duration: .01s !important; animation-delay: 0s !important; } }
+
+:root { --key-bg: 33 60% 86%; --key-fg: 25 30% 18%; --key-shadow: 30 30% 70%; }
+.dark { --key-bg: 30 15% 28%; --key-fg: 35 40% 92%; --key-shadow: 30 15% 15%; }
+.keyboard-theme { background: hsl(33 40% 95%); }
+.dark .keyboard-theme { background: hsl(30 10% 14%); }
