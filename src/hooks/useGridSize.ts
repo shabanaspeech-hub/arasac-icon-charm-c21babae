@@ -3,8 +3,8 @@ import { useState, useEffect, useCallback } from 'react';
 export const GRID_OPTIONS = [4, 6, 8, 12, 15, 18] as const;
 export type GridSize = typeof GRID_OPTIONS[number];
 
-const STORAGE_KEY = 'spectra-grid-size';
-const DEFAULT_SIZE: GridSize = 12;
+const STORAGE_KEY = "voxafia-grid-size-v2";
+const DEFAULT_SIZE: GridSize = 18;
 
 export const GRID_COL_CLASSES: Record<GridSize, string> = {
   4: 'grid-cols-2 sm:grid-cols-2 md:grid-cols-4',
