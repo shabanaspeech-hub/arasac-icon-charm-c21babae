@@ -63,7 +63,7 @@ export default function SymbolCard({ symbol, language, onClick, onLongPress, isF
       onTouchEnd={cancelPress}
       onTouchCancel={cancelPress}
       onContextMenu={(e) => { e.preventDefault(); }}
-      className={`relative flex flex-col items-center justify-center p-2 rounded-xl border-[3px] cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg active:scale-95 animate-pop-in w-full h-full min-h-[110px] ${cardClass}`}
+      className={`relative flex flex-col items-center justify-center p-2 rounded-2xl border-2 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg active:scale-95 animate-pop-in w-full h-full min-h-[110px] ${cardClass}`}
     >
       {isFavorite && (
         <Star size={16} className="absolute top-1.5 right-1.5 fill-warning text-warning" />
