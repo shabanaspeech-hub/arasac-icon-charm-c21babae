@@ -83,44 +83,44 @@
   }
 
   .aac-card-core {
-    border-color: hsl(var(--aac-core));
-    background: hsl(var(--aac-core) / 0.35);
+    border-color: hsl(var(--aac-core) / 0.7);
+    background: hsl(var(--aac-core) / 0.18);
   }
   .aac-card-noun {
-    border-color: hsl(var(--aac-noun));
-    background: hsl(var(--aac-noun) / 0.35);
+    border-color: hsl(var(--aac-noun) / 0.7);
+    background: hsl(var(--aac-noun) / 0.18);
   }
   .aac-card-verb {
-    border-color: hsl(var(--aac-verb));
-    background: hsl(var(--aac-verb) / 0.35);
+    border-color: hsl(var(--aac-verb) / 0.7);
+    background: hsl(var(--aac-verb) / 0.18);
   }
   .aac-card-descriptor {
-    border-color: hsl(var(--aac-descriptor));
-    background: hsl(var(--aac-descriptor) / 0.35);
+    border-color: hsl(var(--aac-descriptor) / 0.7);
+    background: hsl(var(--aac-descriptor) / 0.18);
   }
   .aac-card-preposition {
-    border-color: hsl(var(--aac-preposition));
-    background: hsl(var(--aac-preposition) / 0.35);
+    border-color: hsl(var(--aac-preposition) / 0.7);
+    background: hsl(var(--aac-preposition) / 0.18);
   }
   .aac-card-question {
-    border-color: hsl(var(--aac-question));
-    background: hsl(var(--aac-question) / 0.35);
+    border-color: hsl(var(--aac-question) / 0.7);
+    background: hsl(var(--aac-question) / 0.18);
   }
   .aac-card-negation {
-    border-color: hsl(var(--aac-negation));
-    background: hsl(var(--aac-negation) / 0.35);
+    border-color: hsl(var(--aac-negation) / 0.7);
+    background: hsl(var(--aac-negation) / 0.18);
   }
   .aac-card-feeling {
-    border-color: hsl(var(--aac-feeling));
-    background: hsl(var(--aac-feeling) / 0.35);
+    border-color: hsl(var(--aac-feeling) / 0.7);
+    background: hsl(var(--aac-feeling) / 0.18);
   }
   .aac-card-social {
-    border-color: hsl(var(--aac-social));
-    background: hsl(var(--aac-social) / 0.35);
+    border-color: hsl(var(--aac-social) / 0.7);
+    background: hsl(var(--aac-social) / 0.18);
   }
   .aac-card-misc {
-    border-color: hsl(var(--aac-misc));
-    background: hsl(var(--aac-misc) / 0.35);
+    border-color: hsl(var(--aac-misc) / 0.7);
+    background: hsl(var(--aac-misc) / 0.18);
   }
 
   .safe-area-bottom {
