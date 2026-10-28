@@ -155,6 +155,7 @@ export default function AACApp({ onReplayIntro }: { onReplayIntro?: () => void }
   const displaySymbols = getDisplaySymbols();
   const phrases = language === 'english' ? quickPhrases.en : quickPhrases.hi;
   const isCustomView = activeCustomCategory !== null && !showFavorites;
+  const visibleCustomCategories = customCategories.filter(c => editMode || getItemsForCategory(c.id).length > 0);
   const customItems = activeCustomCategory ? getItemsForCategory(activeCustomCategory) : [];
 
   // Lookup maps for favorites
@@ -220,7 +221,7 @@ export default function AACApp({ onReplayIntro }: { onReplayIntro?: () => void }
       active: key === currentCategory && !isCustomView && !showFavorites && !showBeginner && !searchQuery,
       go: () => openCategory(key),
     })),
-    ...customCategories.map(c => ({
+    ...visibleCustomCategories.map(c => ({
       key: c.id,
       name: language === 'english' ? c.nameEn : c.nameHi,
       active: activeCustomCategory === c.id && !showFavorites && !showBeginner,
@@ -260,8 +261,8 @@ export default function AACApp({ onReplayIntro }: { onReplayIntro?: () => void }
         const active = key === currentCategory && !isCustomView && !showFavorites && !showBeginner && !showFolders && !searchQuery;
         return <DockItem key={key} active={active} icon={icon} label={name} onClick={() => openCategory(key)} />;
       })}
-      {(customCategories.length > 0 || editMode) && <div className="h-px bg-border my-1.5" />}
-      {customCategories.map(cat => (
+      {(visibleCustomCategories.length > 0 || editMode) && <div className="h-px bg-border my-1.5" />}
+      {visibleCustomCategories.map(cat => (
         <DockItem key={cat.id} active={activeCustomCategory === cat.id && !showFavorites && !showBeginner} icon="📷" label={language === 'english' ? cat.nameEn : cat.nameHi} onClick={() => openCustom(cat.id)} />
       ))}
       {editMode && (
@@ -276,7 +277,7 @@ export default function AACApp({ onReplayIntro }: { onReplayIntro?: () => void }
     <div className="h-[100dvh] flex flex-col bg-background text-foreground overflow-hidden">
       {/* Top bar */}
       <header className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-2 bg-card border-b border-border shrink-0">
-        <button onClick={() => setFolderSheetOpen(true)} className="md:hidden p-2 -ml-1 rounded-lg hover:bg-secondary shrink-0" aria-label="Open folders">
+        <button onClick={() => setFolderSheetOpen(true)} className="p-2 -ml-1 rounded-lg hover:bg-secondary shrink-0" aria-label="Open folders">
           <Menu size={22} />
         </button>
         <img src={spectraLogo} alt="" className="w-8 h-8 rounded-full shrink-0" />
@@ -330,9 +331,6 @@ export default function AACApp({ onReplayIntro }: { onReplayIntro?: () => void }
 
       <div className="flex-1 flex min-h-0">
         {/* Side folder dock */}
-        <aside className="hidden md:block w-52 shrink-0 border-r border-border bg-card overflow-y-auto p-2">
-          {folderList}
-        </aside>
 
         {/* Board */}
         <main className="flex-1 min-w-0 flex flex-col">
@@ -355,7 +353,7 @@ export default function AACApp({ onReplayIntro }: { onReplayIntro?: () => void }
                   const { icon, name } = splitLabel(language === 'english' ? val.en : val.hi);
                   return { k: key, icon, name, active: key === currentCategory && !isCustomView && !showFavorites && !showBeginner && !searchQuery, go: () => openCategory(key) };
                 }),
-                ...customCategories.map(c => ({ k: c.id, icon: '📷', name: language === 'english' ? c.nameEn : c.nameHi, active: activeCustomCategory === c.id && !showFavorites && !showBeginner, go: () => openCustom(c.id) })),
+                ...visibleCustomCategories.map(c => ({ k: c.id, icon: '📷', name: language === 'english' ? c.nameEn : c.nameHi, active: activeCustomCategory === c.id && !showFavorites && !showBeginner, go: () => openCustom(c.id) })),
               ].map(c => (
                 <button key={c.k} onClick={c.go} aria-current={c.active ? 'page' : undefined}
                   className={`shrink-0 flex items-center gap-1.5 px-3 h-10 rounded-full border text-xs font-bold whitespace-nowrap transition ${c.active ? 'bg-primary text-primary-foreground border-primary' : 'bg-secondary border-border hover:bg-card'}`}>
