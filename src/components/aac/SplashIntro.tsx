@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
-import spectraLogo from '@/assets/spectra-logo.png';
+import { RAINBOW_COLORS } from './RainbowLogo';
 
-// Startup story: rain from grey clouds → sky clears → rainbow with sparkles →
-// rainbow spins into the Spectra Speech logo → VOXAFIA pops in letter by
-// letter with the tagline → app appears. Skippable at any moment.
+// Startup story: rain → sky clears → full-screen rainbow paints across the
+// whole screen with sparkles → it shrinks into the VOXAFIA rainbow logo →
+// VOXAFIA pops in letter by letter → credentials + tagline → app.
 const NAME = 'VOXAFIA';
-const TOTAL_MS = 6800;
+const TOTAL_MS = 7600;
 
 export default function SplashIntro({ onDone }: { onDone: () => void }) {
   const [leaving, setLeaving] = useState(false);
@@ -16,14 +16,13 @@ export default function SplashIntro({ onDone }: { onDone: () => void }) {
     return () => { clearTimeout(t1); clearTimeout(t2); };
   }, [onDone]);
 
-  const drops = Array.from({ length: 40 }, (_, i) => i);
-  const sparkles = Array.from({ length: 18 }, (_, i) => i);
+  const drops = Array.from({ length: 50 }, (_, i) => i);
+  const sparkles = Array.from({ length: 14 }, (_, i) => i);
 
   return (
     <div className={`splash-root ${leaving ? 'splash-leave' : ''}`} role="presentation">
       <div className="splash-sky" />
 
-      {/* Clouds + rain */}
       <div className="splash-clouds">
         <div className="splash-cloud" style={{ left: '8%', top: '10%' }} />
         <div className="splash-cloud" style={{ left: '42%', top: '4%', transform: 'scale(1.3)' }} />
@@ -35,24 +34,35 @@ export default function SplashIntro({ onDone }: { onDone: () => void }) {
         ))}
       </div>
 
-      {/* Rainbow */}
-      <div className="splash-rainbow">
-        {[0, 1, 2, 3, 4, 5, 6].map(i => <span key={i} className={`splash-band splash-band-${i}`} style={{ top: i * 14, left: i * 14, right: i * 14, height: `calc(200% - ${i * 28}px)` }} />)}
-      </div>
+      {/* Full-screen rainbow — covers every screen size */}
+      <svg className="splash-bigbow" viewBox="0 0 1000 1000" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+        {RAINBOW_COLORS.map((c, i) => {
+          const r = 900 - i * 125;
+          return (
+            <path key={c} d={`M ${500 - r} 1000 A ${r} ${r} 0 0 1 ${500 + r} 1000`} fill="none" stroke={c} strokeWidth={125} strokeLinecap="round"
+              pathLength={100} className="rb-paint" style={{ animationDelay: `${2 + i * 0.12}s` }} />
+          );
+        })}
+      </svg>
       <div className="splash-sparkles">
         {sparkles.map(i => (
-          <span key={i} className="splash-sparkle" style={{ left: `${10 + ((i * 53) % 80)}%`, top: `${15 + ((i * 37) % 50)}%`, animationDelay: `${2 + (i % 6) * 0.15}s` }}>✦</span>
+          <span key={i} className="splash-sparkle" style={{ left: `${8 + ((i * 53) % 84)}%`, top: `${10 + ((i * 37) % 60)}%`, animationDelay: `${2.6 + (i % 6) * 0.15}s` }} />
         ))}
       </div>
 
-      {/* Logo + name */}
       <div className="splash-brand">
-        <img src={spectraLogo} alt="Spectra Speech" className="splash-logo" />
+        <svg viewBox="0 0 200 104" className="splash-logo" aria-label="VOXAFIA rainbow logo">
+          {RAINBOW_COLORS.map((c, i) => {
+            const r = 86 - i * 11;
+            return <path key={c} d={`M ${100 - r} 100 A ${r} ${r} 0 0 1 ${100 + r} 100`} fill="none" stroke={c} strokeWidth={11} strokeLinecap="round" />;
+          })}
+        </svg>
         <h1 className="splash-name" aria-label={NAME}>
           {NAME.split('').map((ch, i) => (
-            <span key={i} style={{ animationDelay: `${4.6 + i * 0.12}s` }}>{ch}</span>
+            <span key={i} style={{ animationDelay: `${5 + i * 0.12}s` }}>{ch}</span>
           ))}
         </h1>
+        <p className="splash-cred">Research &amp; evidence-based app by a Speech Language Therapist</p>
         <p className="splash-tagline">Every Voice Deserves to Be Heard</p>
       </div>
 

@@ -1,7 +1,7 @@
 import { useState, useCallback, useMemo, type ReactNode } from 'react';
 import { Volume2, Delete, Trash2, Mic, Search, Settings, Plus, FolderOpen, Lock, Unlock, Star, ChevronUp, ChevronDown, X, LayoutGrid, Sparkles, Menu, Home } from 'lucide-react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
-import spectraLogo from '@/assets/spectra-logo.png';
+import RainbowLogo from './RainbowLogo';
 import { symbols, categories, quickPhrases, type AACSymbol, type CategoryKey } from '@/data/aacData';
 import { useSpeech } from '@/hooks/useSpeech';
 import { useUsageTracker } from '@/hooks/useUsageTracker';
@@ -280,7 +280,7 @@ export default function AACApp({ onReplayIntro }: { onReplayIntro?: () => void }
         <button onClick={() => setFolderSheetOpen(true)} className="p-2 -ml-1 rounded-lg hover:bg-secondary shrink-0" aria-label="Open folders">
           <Menu size={22} />
         </button>
-        <img src={spectraLogo} alt="" className="w-8 h-8 rounded-full shrink-0" />
+        <RainbowLogo className="w-12 text-[40px] shrink-0" />
         <div className="hidden min-[430px]:flex flex-col leading-tight min-w-0">
           <span className="font-extrabold text-sm sm:text-base tracking-wide whitespace-nowrap">VOXAFIA AAC</span>
           <span className="hidden sm:block text-[10px] text-muted-foreground whitespace-nowrap">Every Voice Deserves to Be Heard</span>
