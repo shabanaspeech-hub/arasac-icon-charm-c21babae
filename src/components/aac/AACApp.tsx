@@ -281,10 +281,6 @@ export default function AACApp({ onReplayIntro }: { onReplayIntro?: () => void }
           <Menu size={22} />
         </button>
         <RainbowLogo className="w-12 text-[40px] shrink-0" />
-        <div className="hidden min-[430px]:flex flex-col leading-tight min-w-0">
-          <span className="font-extrabold text-sm sm:text-base tracking-wide whitespace-nowrap">VOXAFIA AAC</span>
-          <span className="hidden sm:block text-[10px] text-muted-foreground whitespace-nowrap">Every Voice Deserves to Be Heard</span>
-        </div>
         <div className="flex-1 flex justify-center min-w-0">
           <div className="inline-flex rounded-xl border border-border bg-secondary p-1 max-w-full">
             {(() => {
