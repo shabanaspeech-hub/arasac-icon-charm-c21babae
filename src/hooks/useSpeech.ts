@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react';
+import { makeUtterance } from '@/lib/voice';
 
 export interface VoiceSettings {
   rate: number;
@@ -14,8 +15,7 @@ export function useSpeech() {
   });
 
   const speak = useCallback((text: string, language: 'english' | 'hindi') => {
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = language === 'english' ? 'en-US' : 'hi-IN';
+    const utterance = makeUtterance(text, language);
     utterance.rate = voiceSettings.rate;
     utterance.pitch = voiceSettings.pitch;
     utterance.volume = voiceSettings.volume;

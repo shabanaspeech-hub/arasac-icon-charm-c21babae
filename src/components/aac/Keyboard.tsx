@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { Delete, CornerDownLeft, ArrowBigUp } from 'lucide-react';
 import { symbols } from '@/data/aacData';
 import { useArasaacPictogram, getArasaacImageUrl } from '@/hooks/useArasaac';
+import { makeUtterance } from '@/lib/voice';
 
 interface KeyboardProps {
   language: 'english' | 'hindi';
@@ -66,8 +67,7 @@ const keyBase =
 
 function sayKey(text: string, language: 'english' | 'hindi') {
   if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
-  const u = new SpeechSynthesisUtterance(SPOKEN[text] ?? text);
-  u.lang = language === 'english' ? 'en-US' : 'hi-IN';
+  const u = makeUtterance(SPOKEN[text] ?? text, language);
   u.rate = 1;
   speechSynthesis.cancel();
   speechSynthesis.speak(u);
