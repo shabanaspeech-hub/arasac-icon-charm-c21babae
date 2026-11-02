@@ -51,7 +51,7 @@ const EXTRA: Record<string, Category> = {
 
 // Returns null for words we don't understand (pronouns, articles, colours…)
 // so the assistant stays quiet instead of inventing nonsense like "More I".
-function classify(word: string): Category | null {
+export function classify(word: string): Category | null {
   const w = word.toLowerCase();
   return CATEGORY_MAP[w] || EXTRA[w] || null;
 }

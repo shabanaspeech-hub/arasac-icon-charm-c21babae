@@ -21,6 +21,8 @@ import CategoryManagerDialog from './CategoryManagerDialog';
 import CustomItemCard from './CustomItemCard';
 import PagedGrid, { type PagedGridItem } from './PagedGrid';
 import InlineAssistantStrip from './InlineAssistantStrip';
+import ProDialog from './ProDialog';
+import { usePro, isCategoryFree } from '@/hooks/usePro';
 import BeginnerBoard, { type BeginnerWord } from './BeginnerBoard';
 import CategoryPictogram from './CategoryPictogram';
 
@@ -57,6 +59,8 @@ export default function AACApp({ onReplayIntro }: { onReplayIntro?: () => void }
   const { favorites, isFavorite, toggleFavorite, removeFavorite, moveFavorite } = useFavorites();
   const { voiceSettings, setVoiceSettings, speak } = useSpeech();
   const { profile: childProfile, toggleAssistant } = useChildProfile();
+  const { isPro, setIsPro, unlock: unlockPro } = usePro();
+  const [proOpen, setProOpen] = useState(false);
 
 
   const { trackWord } = useUsageTracker();
@@ -200,8 +204,14 @@ export default function AACApp({ onReplayIntro }: { onReplayIntro?: () => void }
   const goFolder = (fn: () => void) => { setShowFolders(false); fn(); setSearchQuery(''); setFolderSheetOpen(false); };
   const openBeginner = () => goFolder(() => { setShowBeginner(true); setShowFavorites(false); setActiveCustomCategory(null); });
   const openFavorites = () => goFolder(() => { setShowFavorites(true); setShowBeginner(false); setActiveCustomCategory(null); });
-  const openCategory = (key: string) => goFolder(() => { setCurrentCategory(key); setActiveCustomCategory(null); setShowFavorites(false); setShowBeginner(false); });
-  const openCustom = (id: string) => goFolder(() => { setActiveCustomCategory(id); setShowFavorites(false); setShowBeginner(false); });
+  const openCategory = (key: string) => {
+    if (!isPro && !isCategoryFree(key)) { setFolderSheetOpen(false); setProOpen(true); return; }
+    goFolder(() => { setCurrentCategory(key); setActiveCustomCategory(null); setShowFavorites(false); setShowBeginner(false); });
+  };
+  const openCustom = (id: string) => {
+    if (!isPro) { setFolderSheetOpen(false); setProOpen(true); return; }
+    goFolder(() => { setActiveCustomCategory(id); setShowFavorites(false); setShowBeginner(false); });
+  };
 
   const openAllFolders = () => goFolder(() => { setShowBeginner(false); setShowFavorites(false); setActiveCustomCategory(null); setShowFolders(true); });
   const openHome = () => homePage === 'folders' ? openAllFolders() : homePage === 'core' ? openCategory('core') : openBeginner();
@@ -323,6 +333,7 @@ export default function AACApp({ onReplayIntro }: { onReplayIntro?: () => void }
         onSpeak={(t) => speak(t, language)}
         onAddToBoard={(t) => addPhrase(t)}
         onClose={() => setAssistantTrigger('')}
+        onTurnOff={() => { setAssistantTrigger(''); if (childProfile.assistantEnabled) toggleAssistant(); }}
       />
 
       <div className="flex-1 flex min-h-0">
@@ -336,7 +347,10 @@ export default function AACApp({ onReplayIntro }: { onReplayIntro?: () => void }
                 <Home size={14} /> {language === 'english' ? 'Home' : 'होम'}
               </button>
             )}
-            <h2 className="text-sm font-extrabold truncate">{currentTitle}</h2>
+            <h2 className="flex-1 text-sm font-extrabold truncate">{currentTitle}</h2>
+            <button onClick={() => { if (childProfile.assistantEnabled) setAssistantTrigger(''); toggleAssistant(); }} aria-pressed={childProfile.assistantEnabled} className={`shrink-0 flex items-center gap-1 px-2.5 py-1.5 rounded-full border text-xs font-bold ${childProfile.assistantEnabled ? 'bg-primary text-primary-foreground border-primary' : 'bg-card border-border'}`}>
+              <Sparkles size={14} /> {language === 'english' ? `Related words ${childProfile.assistantEnabled ? 'ON' : 'OFF'}` : `संबंधित शब्द ${childProfile.assistantEnabled ? 'चालू' : 'बंद'}`}
+            </button>
           </div>
           {!showBeginner && !showFolders && (
           <div className="relative flex items-center gap-1 px-1 py-1.5 border-b border-border bg-card shrink-0">
@@ -539,6 +553,9 @@ export default function AACApp({ onReplayIntro }: { onReplayIntro?: () => void }
               <button onClick={toggleAssistant} className={`w-full flex items-center gap-2 px-3 py-2.5 rounded-lg font-bold border ${childProfile.assistantEnabled ? 'bg-primary text-primary-foreground border-primary' : 'bg-card border-border'}`}>
                 <Sparkles size={16} /> {language === 'english' ? `Assistant ${childProfile.assistantEnabled ? 'ON' : 'OFF'}` : `सहायक ${childProfile.assistantEnabled ? 'चालू' : 'बंद'}`}
               </button>
+              <button onClick={() => isPro ? setIsPro(false) : (setSettingsOpen(false), setProOpen(true))} className={`w-full flex items-center gap-2 px-3 py-2.5 rounded-lg font-bold border ${isPro ? 'bg-primary text-primary-foreground border-primary' : 'bg-card border-border'}`}>
+                {isPro ? <Unlock size={16} /> : <Lock size={16} />} {isPro ? (language === 'english' ? 'VOXAFIA Pro ON (tap for Free view)' : 'VOXAFIA Pro चालू') : (language === 'english' ? 'Free version — Unlock Pro' : 'मुफ़्त संस्करण — Pro खोलें')}
+              </button>
               <button onClick={() => { setSettingsOpen(false); setVoiceModalOpen(true); }} className="w-full flex items-center gap-2 px-3 py-2.5 rounded-lg font-bold border border-border bg-card">
                 <Mic size={16} /> {language === 'english' ? 'Voice settings' : 'आवाज़ सेटिंग्स'}
               </button>
@@ -587,6 +604,8 @@ export default function AACApp({ onReplayIntro }: { onReplayIntro?: () => void }
         onDelete={removeCategory}
       />
 
+
+      <ProDialog open={proOpen} onClose={() => setProOpen(false)} onUnlock={unlockPro} language={language} />
 
       <InstallBanner />
     </div>

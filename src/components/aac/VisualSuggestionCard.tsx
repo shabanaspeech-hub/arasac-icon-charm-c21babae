@@ -38,13 +38,14 @@ function getEmoji(text: string): string {
 interface VisualCardProps {
   text: string;
   size?: 'sm' | 'md' | 'lg';
+  picture?: string;
   onTap: () => void;
   onAdd?: () => void;
   onFav?: () => void;
 }
 
-export function VisualSuggestionCard({ text, size = 'md', onTap, onAdd, onFav }: VisualCardProps) {
-  const keyword = pickKeyword(text);
+export function VisualSuggestionCard({ text, size = 'md', picture, onTap, onAdd, onFav }: VisualCardProps) {
+  const keyword = picture || pickKeyword(text);
   const { data: pictogramId } = useArasaacPictogram(keyword);
   const [imgError, setImgError] = useState(false);
   const emoji = getEmoji(text);
