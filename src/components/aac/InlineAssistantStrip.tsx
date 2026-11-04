@@ -12,11 +12,12 @@ interface Props {
   onAddToBoard?: (text: string) => void;
   onClose?: () => void;
   onTurnOff?: () => void;
+  enabled?: boolean;
 }
 
 type Item = { text: string; pic?: string };
 
-export default function InlineAssistantStrip({ trigger, language, onSpeak, onAddToBoard, onClose, onTurnOff }: Props) {
+export default function InlineAssistantStrip({ trigger, language, onSpeak, onAddToBoard, onClose, onTurnOff, enabled }: Props) {
   const { profile } = useChildProfile();
 
   const result = useMemo(() => {
@@ -27,7 +28,7 @@ export default function InlineAssistantStrip({ trigger, language, onSpeak, onAdd
     return { relatedWords: m(r.relatedWords), currentLevel: m(r.currentLevel), expandedLanguage: m(r.expandedLanguage) };
   }, [trigger, profile, language]);
 
-  if (!profile.assistantEnabled || !trigger || !result) return null;
+  if (!(enabled ?? profile.assistantEnabled) || !trigger || !result) return null;
 
   const sections: Array<{ label: string; labelHi: string; items: Item[] }> = [
     { label: 'Related Words', labelHi: 'संबंधित शब्द', items: result.relatedWords },

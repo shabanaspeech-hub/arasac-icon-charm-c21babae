@@ -69,11 +69,6 @@ export default function SymbolCard({ symbol, language, onClick, onLongPress, isF
         <Star size={16} className="absolute top-1.5 right-1.5 fill-warning text-warning" />
       )}
 
-      {symbol.core && (
-        <span className="absolute top-1 left-1 bg-success text-success-foreground text-[10px] px-1.5 py-0.5 rounded font-bold">
-          CORE
-        </span>
-      )}
 
       <div className="flex-1 w-full flex items-center justify-center min-h-0 mb-1">
         {pictogramId && !imgError ? (
@@ -92,8 +87,7 @@ export default function SymbolCard({ symbol, language, onClick, onLongPress, isF
         )}
       </div>
 
-      <span className="text-sm sm:text-base font-bold text-foreground text-center leading-tight">{text}</span>
-      <span className="text-[11px] text-muted-foreground text-center">{translation}</span>
+      <span className="text-xs sm:text-sm font-bold text-foreground text-center leading-tight uppercase">{text}</span>
     </button>
   );
 }

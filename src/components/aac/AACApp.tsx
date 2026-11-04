@@ -291,18 +291,7 @@ export default function AACApp({ onReplayIntro }: { onReplayIntro?: () => void }
           <Menu size={22} />
         </button>
         <RainbowLogo className="w-12 text-[40px] shrink-0" />
-        <div className="flex-1 flex justify-center min-w-0">
-          <div className="inline-flex rounded-xl border border-border bg-secondary p-1 max-w-full">
-            {(() => {
-              const typing = currentCategory === 'keyboard' && !showBeginner && !showFavorites && !showFolders && !activeCustomCategory;
-              const cls = (on: boolean) => 'px-2.5 sm:px-3 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition whitespace-nowrap ' + (on ? 'bg-card shadow text-foreground' : 'text-muted-foreground');
-              return (<>
-                <button role="tab" aria-selected={!typing} onClick={openHome} className={cls(!typing)}>🖼️ {language === 'english' ? 'Pictures' : 'चित्र'}</button>
-                <button role="tab" aria-selected={typing} onClick={() => openCategory('keyboard')} className={cls(typing)}>⌨️ {language === 'english' ? 'Type' : 'टाइप'}</button>
-              </>);
-            })()}
-          </div>
-        </div>
+        <div className="flex-1" />
         {editMode && <span className="hidden sm:inline text-xs font-bold px-2 py-1 rounded-md bg-warning text-warning-foreground shrink-0">{language === 'english' ? 'Edit mode' : 'एडिट मोड'}</span>}
         <button onClick={() => setSettingsOpen(true)} className="p-2 sm:px-3 sm:py-2 rounded-lg border border-border text-sm font-bold hover:bg-secondary shrink-0" aria-label="Settings">
           <Settings size={18} /> <span className="hidden sm:inline">{language === 'english' ? 'Settings' : 'सेटिंग्स'}</span>
@@ -342,6 +331,7 @@ export default function AACApp({ onReplayIntro }: { onReplayIntro?: () => void }
         onSpeak={(t) => speak(t, language)}
         onAddToBoard={(t) => addPhrase(t)}
         onClose={() => setAssistantTrigger('')}
+        enabled={childProfile.assistantEnabled}
       />
 
       <div className="flex-1 flex min-h-0">
@@ -356,10 +346,6 @@ export default function AACApp({ onReplayIntro }: { onReplayIntro?: () => void }
               </button>
             )}
             <h2 className="flex-1 text-sm font-extrabold truncate">{currentTitle}</h2>
-            <button onClick={() => { setAssistantTrigger(''); toggleAssistant(); }} role="switch" aria-checked={childProfile.assistantEnabled} title={language === 'english' ? 'Choose before tapping a word: show related words automatically?' : 'शब्द दबाने से पहले चुनें'} className={`shrink-0 flex items-center gap-2 pl-2.5 pr-1 py-1 rounded-full border text-xs font-bold ${childProfile.assistantEnabled ? 'bg-primary text-primary-foreground border-primary' : 'bg-card border-border'}`}>
-              <Sparkles size={14} /> {language === 'english' ? 'Related words' : 'संबंधित शब्द'}
-              <span className={`relative w-9 h-5 rounded-full transition ${childProfile.assistantEnabled ? 'bg-primary-foreground/40' : 'bg-muted'}`}><span className={`absolute top-0.5 w-4 h-4 rounded-full bg-card shadow transition-all ${childProfile.assistantEnabled ? 'left-[18px]' : 'left-0.5'}`} /></span>
-            </button>
           </div>
           {!showBeginner && !showFolders && (
           <div className="relative flex items-center gap-1 px-1 py-1.5 border-b border-border bg-card shrink-0">
@@ -536,6 +522,10 @@ export default function AACApp({ onReplayIntro }: { onReplayIntro?: () => void }
                   🌈 {language === 'english' ? 'Replay intro' : 'इंट्रो फिर से देखें'}
                 </button>
               )}
+            <button onClick={() => { setAssistantTrigger(''); toggleAssistant(); }} role="switch" aria-checked={childProfile.assistantEnabled} title={language === 'english' ? 'Choose before tapping a word: show related words automatically?' : 'शब्द दबाने से पहले चुनें'} className={`w-full justify-between flex items-center gap-2 py-2 pl-2.5 pr-1 py-1 rounded-full border text-xs font-bold ${childProfile.assistantEnabled ? 'bg-primary text-primary-foreground border-primary' : 'bg-card border-border'}`}>
+              <Sparkles size={14} /> {language === 'english' ? 'Related words' : 'संबंधित शब्द'}
+              <span className={`relative w-9 h-5 rounded-full transition ${childProfile.assistantEnabled ? 'bg-primary-foreground/40' : 'bg-muted'}`}><span className={`absolute top-0.5 w-4 h-4 rounded-full bg-card shadow transition-all ${childProfile.assistantEnabled ? 'left-[18px]' : 'left-0.5'}`} /></span>
+            </button>
             </section>
             <section className="space-y-2">
               <h3 className="text-xs font-bold uppercase text-muted-foreground">{language === 'english' ? 'Language' : 'भाषा'}</h3>

@@ -19,14 +19,9 @@ import { ChevronLeft, ChevronRight, GripVertical } from 'lucide-react';
 import type { GridSize } from '@/hooks/useGridSize';
 
 // rows x cols per page so cards fill the whole screen evenly
-const LAYOUT: Record<number, string> = {
-  4: 'grid-cols-2 grid-rows-2',
-  6: 'grid-cols-2 grid-rows-3 sm:grid-cols-3 sm:grid-rows-2',
-  8: 'grid-cols-2 grid-rows-4 sm:grid-cols-4 sm:grid-rows-2',
-  12: 'grid-cols-3 grid-rows-4 sm:grid-cols-4 sm:grid-rows-3',
-  15: 'grid-cols-3 grid-rows-5 sm:grid-cols-5 sm:grid-rows-3',
-  18: 'grid-cols-3 grid-rows-6 sm:grid-cols-6 sm:grid-rows-3',
-};
+// Same card size as the home board on every page
+const UNIFORM = 'grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 auto-rows-[minmax(110px,1fr)] sm:auto-rows-[minmax(130px,1fr)]';
+const LAYOUT: Record<number, string> = { 4: 'grid-cols-2 auto-rows-[minmax(130px,1fr)]', 6: 'grid-cols-2 sm:grid-cols-3 auto-rows-[minmax(130px,1fr)]', 8: 'grid-cols-2 sm:grid-cols-4 auto-rows-[minmax(130px,1fr)]', 12: UNIFORM, 15: UNIFORM, 18: UNIFORM };
 
 export interface PagedGridItem {
   id: string;
@@ -167,7 +162,7 @@ export default function PagedGrid({ items, gridSize, storageKey, trailing }: Pro
         onDragEnd={handleDragEnd}
       >
         <SortableContext items={sortableIds} strategy={rectSortingStrategy}>
-          <div className={`grid ${layout} gap-3 h-full min-h-0`}>
+          <div className={`grid ${layout} gap-1.5 sm:gap-2 min-h-full`}>
             {pageSlice.map((slot, i) =>
               slot.kind === 'item' ? (
                 <Cell key={slot.entry.id} id={slot.entry.id}>
