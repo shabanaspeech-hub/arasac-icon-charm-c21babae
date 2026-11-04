@@ -5,7 +5,7 @@ import { RAINBOW_COLORS } from './RainbowLogo';
 // whole screen with sparkles → it shrinks into the VOXAFIA rainbow logo →
 // VOXAFIA pops in letter by letter → credentials + tagline → app.
 const NAME = 'VOXAFIA';
-const TOTAL_MS = 7600;
+const TOTAL_MS = 4600;
 
 export default function SplashIntro({ onDone }: { onDone: () => void }) {
   const [leaving, setLeaving] = useState(false);
@@ -40,13 +40,13 @@ export default function SplashIntro({ onDone }: { onDone: () => void }) {
           const r = 900 - i * 125;
           return (
             <path key={c} d={`M ${500 - r} 1000 A ${r} ${r} 0 0 1 ${500 + r} 1000`} fill="none" stroke={c} strokeWidth={125} strokeLinecap="round"
-              pathLength={100} className="rb-paint" style={{ animationDelay: `${2 + i * 0.12}s` }} />
+              pathLength={100} className="rb-paint" style={{ animationDelay: `${0.5 + i * 0.08}s` }} />
           );
         })}
       </svg>
       <div className="splash-sparkles">
         {sparkles.map(i => (
-          <span key={i} className="splash-sparkle" style={{ left: `${8 + ((i * 53) % 84)}%`, top: `${10 + ((i * 37) % 60)}%`, animationDelay: `${2.6 + (i % 6) * 0.15}s` }} />
+          <span key={i} className="splash-sparkle" style={{ left: `${8 + ((i * 53) % 84)}%`, top: `${10 + ((i * 37) % 60)}%`, animationDelay: `${0.8 + (i % 6) * 0.1}s` }} />
         ))}
       </div>
 
@@ -59,7 +59,7 @@ export default function SplashIntro({ onDone }: { onDone: () => void }) {
         </svg>
         <h1 className="splash-name" aria-label={NAME}>
           {NAME.split('').map((ch, i) => (
-            <span key={i} style={{ animationDelay: `${5 + i * 0.12}s` }}>{ch}</span>
+            <span key={i} style={{ animationDelay: `${2.6 + i * 0.08}s` }}>{ch}</span>
           ))}
         </h1>
         <p className="splash-cred">Research &amp; evidence-based app by a Speech Language Therapist</p>

@@ -333,7 +333,6 @@ export default function AACApp({ onReplayIntro }: { onReplayIntro?: () => void }
         onSpeak={(t) => speak(t, language)}
         onAddToBoard={(t) => addPhrase(t)}
         onClose={() => setAssistantTrigger('')}
-        onTurnOff={() => { setAssistantTrigger(''); if (childProfile.assistantEnabled) toggleAssistant(); }}
       />
 
       <div className="flex-1 flex min-h-0">
@@ -348,8 +347,9 @@ export default function AACApp({ onReplayIntro }: { onReplayIntro?: () => void }
               </button>
             )}
             <h2 className="flex-1 text-sm font-extrabold truncate">{currentTitle}</h2>
-            <button onClick={() => { if (childProfile.assistantEnabled) setAssistantTrigger(''); toggleAssistant(); }} aria-pressed={childProfile.assistantEnabled} className={`shrink-0 flex items-center gap-1 px-2.5 py-1.5 rounded-full border text-xs font-bold ${childProfile.assistantEnabled ? 'bg-primary text-primary-foreground border-primary' : 'bg-card border-border'}`}>
-              <Sparkles size={14} /> {language === 'english' ? `Related words ${childProfile.assistantEnabled ? 'ON' : 'OFF'}` : `संबंधित शब्द ${childProfile.assistantEnabled ? 'चालू' : 'बंद'}`}
+            <button onClick={() => { setAssistantTrigger(''); toggleAssistant(); }} role="switch" aria-checked={childProfile.assistantEnabled} title={language === 'english' ? 'Choose before tapping a word: show related words automatically?' : 'शब्द दबाने से पहले चुनें'} className={`shrink-0 flex items-center gap-2 pl-2.5 pr-1 py-1 rounded-full border text-xs font-bold ${childProfile.assistantEnabled ? 'bg-primary text-primary-foreground border-primary' : 'bg-card border-border'}`}>
+              <Sparkles size={14} /> {language === 'english' ? 'Related words' : 'संबंधित शब्द'}
+              <span className={`relative w-9 h-5 rounded-full transition ${childProfile.assistantEnabled ? 'bg-primary-foreground/40' : 'bg-muted'}`}><span className={`absolute top-0.5 w-4 h-4 rounded-full bg-card shadow transition-all ${childProfile.assistantEnabled ? 'left-[18px]' : 'left-0.5'}`} /></span>
             </button>
           </div>
           {!showBeginner && !showFolders && (
@@ -374,7 +374,7 @@ export default function AACApp({ onReplayIntro }: { onReplayIntro?: () => void }
             <button onClick={() => document.getElementById('cat-ribbon')?.scrollBy({ left: 240, behavior: 'smooth' })} className="shrink-0 w-10 h-10 rounded-lg bg-primary text-primary-foreground font-bold text-lg" aria-label="Scroll categories right">›</button>
           </div>
           )}
-          <div className="flex-1 min-h-0 overflow-y-auto p-2">
+          <div className="flex-1 min-h-0 overflow-y-auto p-2 flex flex-col [&>*]:flex-1 [&>*]:min-h-0">
         {/* Content */}
         {showFolders && !searchQuery ? (
           <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 p-2">
@@ -549,9 +549,6 @@ export default function AACApp({ onReplayIntro }: { onReplayIntro?: () => void }
             <section className="space-y-2">
               <button onClick={() => setEditMode(!editMode)} className={`w-full flex items-center gap-2 px-3 py-2.5 rounded-lg font-bold border ${editMode ? 'bg-warning text-warning-foreground border-warning' : 'bg-card border-border'}`}>
                 {editMode ? <Unlock size={16} /> : <Lock size={16} />} {editMode ? (language === 'english' ? 'Edit mode ON' : 'एडिट मोड चालू') : (language === 'english' ? 'Child mode (locked)' : 'चाइल्ड मोड (लॉक)')}
-              </button>
-              <button onClick={toggleAssistant} className={`w-full flex items-center gap-2 px-3 py-2.5 rounded-lg font-bold border ${childProfile.assistantEnabled ? 'bg-primary text-primary-foreground border-primary' : 'bg-card border-border'}`}>
-                <Sparkles size={16} /> {language === 'english' ? `Assistant ${childProfile.assistantEnabled ? 'ON' : 'OFF'}` : `सहायक ${childProfile.assistantEnabled ? 'चालू' : 'बंद'}`}
               </button>
               <button onClick={() => isPro ? setIsPro(false) : (setSettingsOpen(false), setProOpen(true))} className={`w-full flex items-center gap-2 px-3 py-2.5 rounded-lg font-bold border ${isPro ? 'bg-primary text-primary-foreground border-primary' : 'bg-card border-border'}`}>
                 {isPro ? <Unlock size={16} /> : <Lock size={16} />} {isPro ? (language === 'english' ? 'VOXAFIA Pro ON (tap for Free view)' : 'VOXAFIA Pro चालू') : (language === 'english' ? 'Free version — Unlock Pro' : 'मुफ़्त संस्करण — Pro खोलें')}

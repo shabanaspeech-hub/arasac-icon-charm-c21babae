@@ -159,14 +159,14 @@ export default function PagedGrid({ items, gridSize, storageKey, trailing }: Pro
     .map((s) => (s as { kind: 'item'; entry: PagedGridItem }).entry.id);
 
   return (
-    <div className="p-3">
-      <DndContext
+    <div className="h-full min-h-0 flex flex-col p-2 gap-2">
+      <div className="flex-1 min-h-0"><DndContext
         sensors={sensors}
         collisionDetection={closestCenter}
         onDragEnd={handleDragEnd}
       >
         <SortableContext items={sortableIds} strategy={rectSortingStrategy}>
-          <div className={`grid ${layout} gap-3 h-[70vh] min-h-[380px]`}>
+          <div className={`grid ${layout} gap-3 h-full min-h-0`}>
             {pageSlice.map((slot, i) =>
               slot.kind === 'item' ? (
                 <Cell key={slot.entry.id} id={slot.entry.id}>
@@ -180,14 +180,14 @@ export default function PagedGrid({ items, gridSize, storageKey, trailing }: Pro
             )}
           </div>
         </SortableContext>
-      </DndContext>
+      </DndContext></div>
 
       {totalPages > 1 && (
-        <div className="flex items-center justify-center gap-4 mt-4">
+        <div className="flex items-center justify-center gap-4 shrink-0">
           <button
             onClick={() => setPage((p) => Math.max(0, p - 1))}
             disabled={safePage === 0}
-            className="p-3 rounded-full bg-secondary text-foreground disabled:opacity-30 shadow active:scale-95"
+            className="p-2 rounded-full bg-secondary text-foreground disabled:opacity-30 shadow active:scale-95"
             aria-label="Previous page"
           >
             <ChevronLeft size={22} />
@@ -210,7 +210,7 @@ export default function PagedGrid({ items, gridSize, storageKey, trailing }: Pro
           <button
             onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
             disabled={safePage >= totalPages - 1}
-            className="p-3 rounded-full bg-secondary text-foreground disabled:opacity-30 shadow active:scale-95"
+            className="p-2 rounded-full bg-secondary text-foreground disabled:opacity-30 shadow active:scale-95"
             aria-label="Next page"
           >
             <ChevronRight size={22} />

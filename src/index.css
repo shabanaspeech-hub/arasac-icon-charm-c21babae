@@ -131,33 +131,33 @@
 /* ===== VOXAFIA startup intro ===== */
 .splash-root { position: fixed; inset: 0; z-index: 100; overflow: hidden; display: flex; align-items: center; justify-content: center; font-family: 'Nunito', sans-serif; transition: opacity .5s ease; }
 .splash-leave { opacity: 0; }
-.splash-sky { position: absolute; inset: 0; background: linear-gradient(hsl(215 15% 45%), hsl(215 12% 65%)); animation: sky-clear 1.2s ease 1.6s forwards; }
+.splash-sky { position: absolute; inset: 0; background: linear-gradient(hsl(215 15% 45%), hsl(215 12% 65%)); animation: sky-clear .5s ease .3s forwards; }
 @keyframes sky-clear { to { background: linear-gradient(hsl(200 85% 82%), hsl(45 100% 96%)); filter: brightness(1.05); } }
 .splash-sky { background-size: 100% 100%; }
-.splash-root::before { content: ''; position: absolute; inset: 0; background: linear-gradient(hsl(200 85% 84%), hsl(45 100% 97%)); opacity: 0; animation: fade-in-sky 1.2s ease 1.6s forwards; }
+.splash-root::before { content: ''; position: absolute; inset: 0; background: linear-gradient(hsl(200 85% 84%), hsl(45 100% 97%)); opacity: 0; animation: fade-in-sky .5s ease .3s forwards; }
 @keyframes fade-in-sky { to { opacity: 1; } }
-.splash-clouds { position: absolute; inset: 0; animation: clouds-away 1.4s ease 1.6s forwards; z-index: 2; }
+.splash-clouds { position: absolute; inset: 0; animation: clouds-away .5s ease .3s forwards; z-index: 2; }
 .splash-cloud { position: absolute; width: 180px; height: 60px; border-radius: 60px; background: hsl(215 10% 78%); box-shadow: 40px -25px 0 10px hsl(215 10% 72%), 95px -10px 0 0 hsl(215 10% 75%); }
 @keyframes clouds-away { to { opacity: 0; transform: translateY(-80px); } }
-.splash-rain { position: absolute; inset: 0; z-index: 1; animation: rain-stop .6s ease 1.5s forwards; }
+.splash-rain { position: absolute; inset: 0; z-index: 1; animation: rain-stop .2s ease .3s forwards; }
 .splash-drop { position: absolute; top: -20px; width: 2px; height: 18px; border-radius: 2px; background: hsl(205 70% 88% / .85); animation-name: drop-fall; animation-timing-function: linear; animation-iteration-count: infinite; }
 @keyframes drop-fall { to { transform: translateY(110vh); } }
 @keyframes rain-stop { to { opacity: 0; } }
-.splash-bigbow { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 3; transform-origin: 50% 60%; animation: bigbow-shrink 1.1s cubic-bezier(.6,0,.4,1) 3.7s forwards; }
-.rb-paint { stroke-dasharray: 100; stroke-dashoffset: 100; animation: rb-paint 1.1s ease-out forwards; }
+.splash-bigbow { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 3; transform-origin: 50% 60%; animation: bigbow-shrink .8s cubic-bezier(.6,0,.4,1) 1.6s forwards; }
+.rb-paint { stroke-dasharray: 100; stroke-dashoffset: 100; animation: rb-paint .7s ease-out forwards; }
 @keyframes rb-paint { to { stroke-dashoffset: 0; } }
 @keyframes bigbow-shrink { 0% { transform: scale(1) rotate(0); opacity: 1; } 100% { transform: scale(.08) rotate(360deg); opacity: 0; } }
-.splash-sparkles { position: absolute; inset: 0; z-index: 4; pointer-events: none; animation: rain-stop .4s ease 3.7s forwards; }
+.splash-sparkles { position: absolute; inset: 0; z-index: 4; pointer-events: none; animation: rain-stop .3s ease 1.6s forwards; }
 .splash-sparkle { position: absolute; width: 12px; height: 12px; border-radius: 9999px; background: hsl(0 0% 100%); box-shadow: 0 0 12px 4px hsl(48 100% 85%); opacity: 0; animation: sparkle 1.4s ease-in-out infinite; }
 @keyframes sparkle { 0%,100% { opacity: 0; transform: scale(.3); } 50% { opacity: 1; transform: scale(1.1); } }
 .splash-brand { position: relative; z-index: 5; display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 0 20px; text-align: center; }
-.splash-logo { width: clamp(150px, 40vw, 240px); height: auto; opacity: 0; transform: scale(0) rotate(-360deg); animation: logo-in 1s cubic-bezier(.34,1.56,.64,1) 4.4s forwards; }
+.splash-logo { width: clamp(150px, 40vw, 240px); height: auto; opacity: 0; transform: scale(0) rotate(-360deg); animation: logo-in .7s cubic-bezier(.34,1.56,.64,1) 2.2s forwards; }
 @keyframes logo-in { 60% { opacity: 1; transform: scale(1.15) rotate(0); } 80% { transform: scale(.92); } 100% { opacity: 1; transform: scale(1); } }
 .splash-name { display: flex; font-size: clamp(36px, 9vw, 64px); font-weight: 900; letter-spacing: .12em; color: hsl(220 45% 22%); }
 .splash-name span { opacity: 0; transform: translateY(20px) scale(.5); display: inline-block; animation: letter-pop .4s cubic-bezier(.34,1.56,.64,1) forwards; }
 @keyframes letter-pop { to { opacity: 1; transform: none; } }
-.splash-cred { font-size: clamp(13px, 3vw, 18px); font-weight: 800; color: hsl(175 60% 28%); opacity: 0; animation: letter-pop .6s ease 6s forwards; }
-.splash-tagline { font-size: clamp(13px, 3vw, 18px); font-weight: 700; font-style: italic; color: hsl(220 25% 38%); opacity: 0; animation: letter-pop .6s ease 6.4s forwards; }
+.splash-cred { font-size: clamp(13px, 3vw, 18px); font-weight: 800; color: hsl(175 60% 28%); opacity: 0; animation: letter-pop .5s ease 3.2s forwards; }
+.splash-tagline { font-size: clamp(13px, 3vw, 18px); font-weight: 700; font-style: italic; color: hsl(220 25% 38%); opacity: 0; animation: letter-pop .5s ease 3.5s forwards; }
 .splash-skip { position: absolute; top: 16px; right: 16px; z-index: 6; padding: 8px 16px; border-radius: 9999px; background: hsl(0 0% 100% / .8); color: hsl(220 45% 22%); font-weight: 800; font-size: 14px; }
 @media (prefers-reduced-motion: reduce) { .splash-root * { animation-duration: .01s !important; animation-delay: 0s !important; } }
 

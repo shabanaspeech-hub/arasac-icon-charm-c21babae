@@ -38,49 +38,40 @@ interface Props {
   folders: BeginnerFolder[];
 }
 
-// Beginner home: basic-need words front and centre, with every folder as a
-// picture card beside the board (below it on phones) so a child can jump
-// anywhere in one tap — no scrolling ribbon needed.
+// Beginner home: folder strip on top, 16 basic-need words filling the rest of
+// the screen (4x4 on every device) so nothing needs scrolling.
 export default function BeginnerBoard({ language, onSelect, folders }: Props) {
   return (
-    <div className="p-3 sm:p-4">
-      <div className="flex flex-col-reverse gap-4">
-        {/* Basic need words */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 w-full">
-          {BEGINNER_WORDS.map((w) => {
-            const text = language === 'english' ? w.en : w.hi;
-            return (
-              <VisualSuggestionCard
-                key={w.en}
-                text={text}
-                size="md"
-                onTap={() => onSelect(w)}
-              />
-            );
-          })}
-        </div>
+    <div className="h-full min-h-0 flex flex-col gap-2">
+      <aside
+        aria-label={language === 'english' ? 'Folders' : 'फ़ोल्डर'}
+        className="shrink-0 w-full flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      >
+        {folders.map((f) => (
+          <button
+            key={f.key}
+            onClick={f.onClick}
+            aria-current={f.active ? 'page' : undefined}
+            className={`flex flex-col items-center justify-center gap-1 p-1.5 shrink-0 w-[76px] rounded-2xl border-2 h-[68px] transition-all active:scale-95 ${
+              f.active ? 'bg-primary text-primary-foreground border-primary' : 'bg-card border-border hover:border-primary'
+            }`}
+          >
+            <CategoryPictogram categoryKey={f.key} name={f.name} className="!w-8 !h-8" />
+            <span className="text-[10px] font-bold text-center leading-tight truncate w-full">{f.name}</span>
+          </button>
+        ))}
+      </aside>
 
-        {/* Folder cards — the way to anywhere in the app */}
-        <aside
-          aria-label={language === 'english' ? 'Folders' : 'फ़ोल्डर'}
-          className="w-full flex gap-2 overflow-x-auto pb-1 scrollbar-none"
-        >
-          {folders.map((f) => (
-            <button
-              key={f.key}
-              onClick={f.onClick}
-              aria-current={f.active ? 'page' : undefined}
-              className={`flex flex-col items-center justify-center gap-1.5 p-2.5 shrink-0 w-[88px] rounded-2xl border-2 min-h-[84px] transition-all active:scale-95 hover:-translate-y-0.5 hover:shadow-md ${
-                f.active
-                  ? 'bg-primary text-primary-foreground border-primary'
-                  : 'bg-card border-border hover:border-primary'
-              }`}
-            >
-              <CategoryPictogram categoryKey={f.key} name={f.name} className="!w-9 !h-9" />
-              <span className="text-[11px] font-bold text-center leading-tight">{f.name}</span>
-            </button>
-          ))}
-        </aside>
+      <div className="flex-1 min-h-[220px] grid grid-cols-4 grid-rows-4 gap-1.5 sm:gap-2 w-full">
+        {BEGINNER_WORDS.map((w) => (
+          <VisualSuggestionCard
+            key={w.en}
+            text={language === 'english' ? w.en : w.hi}
+            picture={w.en}
+            size="md"
+            onTap={() => onSelect(w)}
+          />
+        ))}
       </div>
     </div>
   );
