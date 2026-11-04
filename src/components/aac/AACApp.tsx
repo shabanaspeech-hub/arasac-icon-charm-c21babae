@@ -81,7 +81,7 @@ export default function AACApp({ onReplayIntro }: { onReplayIntro?: () => void }
     const text = language === 'english' ? symbol.en : symbol.hi;
     speak(text, language);
     trackWord(text);
-    setAssistantTrigger(childProfile.assistantEnabled ? symbol.en : '');
+    setAssistantTrigger(symbol.en);
     setSentence(prev => [...prev, symbol]);
   }, [language, speak, trackWord]);
 
