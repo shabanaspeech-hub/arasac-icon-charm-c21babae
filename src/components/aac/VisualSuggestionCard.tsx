@@ -50,10 +50,10 @@ export function VisualSuggestionCard({ text, size = 'md', picture, onTap, onAdd,
   const [imgError, setImgError] = useState(false);
   const emoji = getEmoji(text);
 
-  const heights = { sm: 'min-h-[110px]', md: 'min-h-[140px]', lg: 'min-h-[160px]' };
+  const heights = { sm: 'min-h-[90px]', md: 'h-full min-h-[64px]', lg: 'min-h-[140px]' };
 
   return (
-    <div className="relative">
+    <div className="relative h-full">
       <button
         onClick={onTap}
         className={`group w-full ${heights[size]} flex flex-col items-center justify-center p-2 rounded-2xl border-2 aac-card-core hover:border-primary hover:-translate-y-0.5 hover:shadow-lg active:scale-95 transition-all`}
@@ -67,7 +67,7 @@ export function VisualSuggestionCard({ text, size = 'md', picture, onTap, onAdd,
               draggable={false}
               loading="lazy"
               onError={() => setImgError(true)}
-              className="max-w-full max-h-[80px] object-contain pointer-events-none"
+              className="max-w-full max-h-full object-contain pointer-events-none"
             />
           ) : (
             <span className="text-5xl">{emoji}</span>
