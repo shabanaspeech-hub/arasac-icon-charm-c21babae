@@ -311,6 +311,15 @@ export default function AACApp({ onReplayIntro }: { onReplayIntro?: () => void }
 
       {/* Message window */}
       <div className="flex items-stretch gap-2 p-2 bg-secondary/60 border-b border-border shrink-0">
+        {(() => {
+          const typing = currentCategory === 'keyboard' && !showBeginner && !showFavorites && !showFolders && !activeCustomCategory;
+          return (
+            <button onClick={typing ? openHome : () => openCategory('keyboard')} className="flex flex-col items-center justify-center gap-0.5 w-16 sm:w-20 rounded-xl bg-card border border-border font-bold text-xs active:scale-95 transition" aria-label={typing ? 'Pictures' : 'Keyboard'}>
+              <span className="text-2xl" aria-hidden>{typing ? '🖼️' : '⌨️'}</span>
+              {typing ? (language === 'english' ? 'Pictures' : 'चित्र') : (language === 'english' ? 'Keyboard' : 'कीबोर्ड')}
+            </button>
+          );
+        })()}
         <div className="flex-1 min-w-0 rounded-xl bg-card border border-border overflow-hidden">
           <SentenceBar sentence={sentence} language={language} onRemoveWord={removeWord} />
         </div>
