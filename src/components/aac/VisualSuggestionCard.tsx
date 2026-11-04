@@ -50,7 +50,7 @@ export function VisualSuggestionCard({ text, size = 'md', picture, onTap, onAdd,
   const [imgError, setImgError] = useState(false);
   const emoji = getEmoji(text);
 
-  const heights = { sm: 'min-h-[90px]', md: 'h-full min-h-[64px]', lg: 'min-h-[140px]' };
+  const heights = { sm: 'min-h-[90px]', md: 'h-full min-h-0', lg: 'min-h-[140px]' };
 
   return (
     <div className="relative h-full">

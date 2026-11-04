@@ -62,7 +62,7 @@ export default function BeginnerBoard({ language, onSelect, folders }: Props) {
         ))}
       </aside>
 
-      <div className="flex-1 min-h-0 grid grid-cols-4 grid-rows-4 gap-2 w-full">
+      <div className="flex-1 min-h-[220px] grid grid-cols-4 grid-rows-4 gap-1.5 sm:gap-2 w-full">
         {BEGINNER_WORDS.map((w) => (
           <VisualSuggestionCard
             key={w.en}
