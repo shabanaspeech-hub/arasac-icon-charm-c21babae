@@ -374,7 +374,7 @@ export default function AACApp({ onReplayIntro }: { onReplayIntro?: () => void }
             <button onClick={() => document.getElementById('cat-ribbon')?.scrollBy({ left: 240, behavior: 'smooth' })} className="shrink-0 w-10 h-10 rounded-lg bg-primary text-primary-foreground font-bold text-lg" aria-label="Scroll categories right">›</button>
           </div>
           )}
-          <div className="flex-1 min-h-0 overflow-y-auto p-2">
+          <div className="flex-1 min-h-0 overflow-y-auto p-2 flex flex-col [&>*]:flex-1 [&>*]:min-h-0">
         {/* Content */}
         {showFolders && !searchQuery ? (
           <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 p-2">
