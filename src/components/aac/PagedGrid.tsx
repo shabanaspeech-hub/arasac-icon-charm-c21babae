@@ -140,8 +140,9 @@ export default function PagedGrid({ items, gridSize, storageKey, trailing }: Pro
   const pageSlice = flat.slice(start, start + perPage);
 
   const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 10 } }),
-    useSensor(TouchSensor, { activationConstraint: { delay: 600, tolerance: 8 } })
+    // Firm press-and-hold (0.6s, finger kept still) before a card can move
+    useSensor(PointerSensor, { activationConstraint: { delay: 600, tolerance: 6 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 600, tolerance: 6 } })
   );
 
   const handleDragEnd = (e: DragEndEvent) => {

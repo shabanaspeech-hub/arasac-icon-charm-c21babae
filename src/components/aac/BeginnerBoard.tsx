@@ -38,41 +38,31 @@ interface Props {
   folders: BeginnerFolder[];
 }
 
-// Beginner home: folder strip on top, 16 basic-need words filling the rest of
-// the screen (4x4 on every device) so nothing needs scrolling.
+// Avaz-style home: basic-need words first, then every category as a big
+// folder card in the same grid, all cards the same size.
 export default function BeginnerBoard({ language, onSelect, folders }: Props) {
   return (
-    <div className="h-full min-h-0 flex flex-col gap-2">
-      <aside
-        aria-label={language === 'english' ? 'Folders' : 'फ़ोल्डर'}
-        className="shrink-0 w-full flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-      >
-        {folders.map((f) => (
-          <button
-            key={f.key}
-            onClick={f.onClick}
-            aria-current={f.active ? 'page' : undefined}
-            className={`flex flex-col items-center justify-center gap-1 p-1.5 shrink-0 w-[76px] rounded-2xl border-2 h-[68px] transition-all active:scale-95 ${
-              f.active ? 'bg-primary text-primary-foreground border-primary' : 'bg-card border-border hover:border-primary'
-            }`}
-          >
-            <CategoryPictogram categoryKey={f.key} name={f.name} className="!w-8 !h-8" />
-            <span className="text-[10px] font-bold text-center leading-tight truncate w-full">{f.name}</span>
-          </button>
-        ))}
-      </aside>
-
-      <div className="flex-1 min-h-[220px] grid grid-cols-4 grid-rows-4 gap-1.5 sm:gap-2 w-full">
-        {BEGINNER_WORDS.map((w) => (
-          <VisualSuggestionCard
-            key={w.en}
-            text={language === 'english' ? w.en : w.hi}
-            picture={w.en}
-            size="md"
-            onTap={() => onSelect(w)}
-          />
-        ))}
-      </div>
+    <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 auto-rows-[minmax(110px,1fr)] sm:auto-rows-[minmax(130px,1fr)] gap-1.5 sm:gap-2 w-full">
+      {BEGINNER_WORDS.map((w) => (
+        <VisualSuggestionCard
+          key={w.en}
+          text={language === 'english' ? w.en : w.hi}
+          picture={w.en}
+          size="md"
+          onTap={() => onSelect(w)}
+        />
+      ))}
+      {folders.map((f) => (
+        <button
+          key={f.key}
+          onClick={f.onClick}
+          className="relative flex flex-col items-center justify-center gap-1.5 p-2 rounded-2xl border-2 border-success/50 bg-success/15 hover:border-success active:scale-95 transition-all"
+        >
+          <span aria-hidden className="absolute -top-0.5 left-3 w-10 h-2 rounded-t-md bg-success/60" />
+          <CategoryPictogram categoryKey={f.key} name={f.name} className="!w-16 !h-16 sm:!w-20 sm:!h-20" />
+          <span className="text-xs sm:text-sm font-extrabold uppercase text-center leading-tight w-full truncate">{f.name}</span>
+        </button>
+      ))}
     </div>
   );
 }
