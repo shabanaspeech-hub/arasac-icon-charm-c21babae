@@ -63,7 +63,7 @@ const SYM_ROWS = [
 ];
 
 const keyBase =
-  'h-10 sm:h-12 md:h-14 rounded-xl bg-[hsl(var(--key-bg))] text-[hsl(var(--key-fg))] shadow-[0_2px_0_hsl(var(--key-shadow))] font-extrabold text-lg sm:text-2xl flex items-center justify-center active:translate-y-[2px] active:shadow-none transition select-none min-w-0';
+  'h-full min-h-11 rounded-xl bg-[hsl(var(--key-bg))] text-[hsl(var(--key-fg))] shadow-[0_2px_0_hsl(var(--key-shadow))] font-extrabold text-lg sm:text-2xl flex items-center justify-center active:translate-y-[2px] active:shadow-none transition select-none min-w-0';
 
 function sayKey(text: string, language: 'english' | 'hindi') {
   if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
@@ -135,18 +135,18 @@ export default function Keyboard({ language, onAddWord }: KeyboardProps) {
   };
 
   return (
-    <div className="keyboard-theme p-2 sm:p-3 space-y-2 rounded-2xl w-full max-w-5xl mx-auto">
-      <div className="flex items-center gap-2 rounded-xl bg-card border border-border px-3 h-11 sm:h-12">
+    <div className="keyboard-theme p-2 sm:p-3 gap-2 flex flex-col h-full rounded-2xl w-full max-w-5xl mx-auto">
+      <div className="flex items-center gap-2 rounded-xl bg-card border border-border px-3 h-11 sm:h-12 shrink-0">
         <span className="flex-1 text-lg sm:text-xl font-bold truncate">{buffer || <span className="text-muted-foreground font-normal text-base">{language === 'english' ? 'Type a word…' : 'शब्द टाइप करें…'}</span>}</span>
       </div>
 
-      <div className="flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none]" aria-label="Word predictions">
+      <div className="flex gap-2 overflow-x-auto pb-1 shrink-0 [scrollbar-width:none]" aria-label="Word predictions">
         {predictions.map(p => <PredictionChip key={p} word={p} onTap={() => pick(p)} />)}
       </div>
 
-      <div className="space-y-1.5 sm:space-y-2">
+      <div className="flex-1 min-h-0 flex flex-col gap-1.5 sm:gap-2">
         {rows.map((row, ri) => (
-          <div key={ri} className="flex gap-1 sm:gap-2">
+          <div key={ri} className="flex-1 flex gap-1 sm:gap-2">
             {row.map((key, ki) => {
               if (key === 'SHIFT') return <button key={ki} onClick={() => setShift(!shift)} className={`${keyBase} flex-[1.5] ${shift ? 'ring-2 ring-primary' : ''}`} aria-label="Shift"><ArrowBigUp /></button>;
               if (key === 'BKSP') return <button key={ki} onClick={() => setBuffer(b => b.slice(0, -1))} className={`${keyBase} flex-[1.5]`} aria-label="Backspace"><Delete /></button>;
@@ -155,7 +155,7 @@ export default function Keyboard({ language, onAddWord }: KeyboardProps) {
             })}
           </div>
         ))}
-        <div className="flex gap-1 sm:gap-2">
+        <div className="flex-1 flex gap-1 sm:gap-2">
           <button onClick={() => setSymMode(!symMode)} className={`${keyBase} flex-[1.5] text-base`}>{symMode ? (language === 'english' ? 'ABC' : 'अ') : '?123'}</button>
           <button onClick={() => type(',')} className={`${keyBase} flex-1`}>,</button>
           <button onClick={() => { setBuffer(p => p + ' '); }} className={`${keyBase} flex-[5] text-base`}>{language === 'english' ? 'space' : 'स्पेस'}</button>
