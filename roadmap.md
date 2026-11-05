@@ -4,3 +4,8 @@
 - [x] Free (Basic Needs + Core Words) / Pro (all else, unlock code) access
 - [x] VOXAFIA rainbow + name icons for install/website
 - [ ] Real Google Play / online payments for Pro (needs user decision)
+- [x] Unlock all folders for now
+- [x] Mobile keyboard fills screen; logo/settings only on home
+- [x] Capacitor Phase 1 config (app ID in.speechtherapys.voxafia)
+- [ ] Android native folder, API 36, mic permission, icon/splash (needs user's computer: npx cap add android)
+- [ ] Capacitor Phase 2–4 (awaiting approval)

@@ -14,7 +14,7 @@ export function isCategoryFree(key: string): boolean {
 }
 
 export function usePro() {
-  const [isPro, setIsPro] = useState(() => localStorage.getItem(KEY) === '1');
+  const [isPro, setIsPro] = useState(true) // all folders open for now;
   useEffect(() => { localStorage.setItem(KEY, isPro ? '1' : '0'); }, [isPro]);
   const unlock = useCallback((code: string) => {
     if (isValidProCode(code)) { setIsPro(true); return true; }

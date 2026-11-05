@@ -217,6 +217,8 @@ export default function AACApp({ onReplayIntro }: { onReplayIntro?: () => void }
   const openHome = () => homePage === 'folders' ? openAllFolders() : homePage === 'core' ? openCategory('core') : openBeginner();
   const atHome = homePage === 'folders' ? showFolders : homePage === 'core' ? (currentCategory === 'core' && !showBeginner && !showFavorites && !activeCustomCategory && !showFolders) : showBeginner;
 
+  const typingView = currentCategory === 'keyboard' && !showBeginner && !showFavorites && !showFolders && !activeCustomCategory && !searchQuery;
+
   const splitLabel = (label: string) => {
     const i = label.indexOf(' ');
     return i > 0 ? { icon: label.slice(0, i), name: label.slice(i + 1) } : { icon: '📁', name: label };
@@ -286,7 +288,7 @@ export default function AACApp({ onReplayIntro }: { onReplayIntro?: () => void }
   return (
     <div className="h-[100dvh] flex flex-col bg-background text-foreground overflow-hidden">
       {/* Top bar */}
-      <header className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-2 bg-card border-b border-border shrink-0">
+      {atHome && <header className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-2 bg-card border-b border-border shrink-0">
         <button onClick={() => setFolderSheetOpen(true)} className="p-2 -ml-1 rounded-lg hover:bg-secondary shrink-0" aria-label="Open folders">
           <Menu size={22} />
         </button>
@@ -296,7 +298,7 @@ export default function AACApp({ onReplayIntro }: { onReplayIntro?: () => void }
         <button onClick={() => setSettingsOpen(true)} className="p-2 sm:px-3 sm:py-2 rounded-lg border border-border text-sm font-bold hover:bg-secondary shrink-0" aria-label="Settings">
           <Settings size={18} /> <span className="hidden sm:inline">{language === 'english' ? 'Settings' : 'सेटिंग्स'}</span>
         </button>
-      </header>
+      </header>}
 
       {/* Message window */}
       <div className="flex items-stretch gap-2 p-2 bg-secondary/60 border-b border-border shrink-0">
@@ -339,15 +341,15 @@ export default function AACApp({ onReplayIntro }: { onReplayIntro?: () => void }
 
         {/* Board */}
         <main className="flex-1 min-w-0 flex flex-col">
-          <div className="flex items-center gap-2 px-3 py-1.5 border-b border-border bg-card shrink-0">
+          {!typingView && <div className="flex items-center gap-2 px-3 py-1.5 border-b border-border bg-card shrink-0">
             {!atHome && (
               <button onClick={openHome} className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-border text-xs font-bold hover:bg-secondary" aria-label="Home">
                 <Home size={14} /> {language === 'english' ? 'Home' : 'होम'}
               </button>
             )}
             <h2 className="flex-1 text-sm font-extrabold truncate">{currentTitle}</h2>
-          </div>
-          {!showBeginner && !showFolders && (
+          </div>}
+          {!showBeginner && !showFolders && !typingView && (
           <div className="relative flex items-center gap-1 px-1 py-1.5 border-b border-border bg-card shrink-0">
             <button onClick={() => document.getElementById('cat-ribbon')?.scrollBy({ left: -240, behavior: 'smooth' })} className="shrink-0 w-8 h-10 rounded-lg border border-border bg-card hover:bg-secondary font-bold" aria-label="Scroll categories left">‹</button>
             <div id="cat-ribbon" className="flex-1 flex gap-1.5 overflow-x-auto scroll-smooth [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
